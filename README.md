@@ -35,6 +35,8 @@ py -m http.server 8000
 | `main.js` | Загрузка `recipes.json`, список и детали рецепта |
 | `recipes.json` | Все рецепты (редактируй здесь) |
 | `bot.py` | Telegram-бот |
+| `run_bot.ps1` | Запуск бота с уже прописанным `SITE_URL` (GitHub Pages) |
+| `run_bot.bat` | То же, если PowerShell блокирует `.ps1` (политика выполнения) |
 | `requirements.txt` | Зависимости Python для бота |
 | `.gitignore` | Исключает служебное (`__pycache__`, `.env` и т.п.) |
 
@@ -49,22 +51,33 @@ py -m http.server 8000
 py -m pip install -r requirements.txt
 ```
 
-3. Задай переменные окружения в PowerShell **на эту сессию** (токен в код и в GitHub не кладём):
+3. Задай **только токен** (он не должен попадать в Git и в чаты). Адрес сайта уже прописан в **`run_bot.ps1`** (`SITE_URL`).
+
+**Вариант А — проще всего (обходит блокировку скриптов Windows):**
+
+```powershell
+$env:TELEGRAM_BOT_TOKEN="вставь_токен_от_BotFather"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\run_bot.ps1
+```
+
+**Вариант Б — через `cmd`:**
+
+```bat
+set TELEGRAM_BOT_TOKEN=вставь_токен_от_BotFather
+run_bot.bat
+```
+
+**Вариант В — вручную:**
 
 ```powershell
 $env:TELEGRAM_BOT_TOKEN="вставь_токен_от_BotFather"
 $env:SITE_URL="https://pctuning0-del.github.io/Ypland_Alchemist_s_Handbook/"
-```
-
-`SITE_URL` — публичная ссылка на сайт (например после GitHub Pages). Без неё бот всё равно ответит на `/start`, но без кнопки «Открыть книгу».
-
-4. Запуск:
-
-```powershell
 py bot.py
 ```
 
-Остановка: **Ctrl+C**.
+Остановка бота: **Ctrl+C**.
+
+Если при `.\run_bot.ps1` ошибка про **Execution Policy**, используй вариант А или Б — менять политику для всей системы не обязательно.
 
 ## Публикация на GitHub Pages
 

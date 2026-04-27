@@ -1,6 +1,9 @@
 # Запуск Telegram-бота с привязкой к сайту на GitHub Pages.
 # Токен НЕ хранится в файле — задай его перед запуском в этой же консоли:
 #   $env:TELEGRAM_BOT_TOKEN="токен_от_BotFather"
+# Если .\run_bot.ps1 блокируется политикой Windows, запускай:
+#   powershell -NoProfile -ExecutionPolicy Bypass -File .\run_bot.ps1
+# или двойной клик по run_bot.bat (после set TELEGRAM_BOT_TOKEN в cmd).
 # Затем:
 #   .\run_bot.ps1
 
