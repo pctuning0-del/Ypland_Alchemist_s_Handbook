@@ -115,7 +115,7 @@ py bot.py
 
 ## Telegram-бот на Node.js (grammY)
 
-Альтернатива Python: в корне есть **`index.js`** и **`package.json`** — минимальный бот на библиотеке [grammY](https://grammy.dev/).
+Альтернатива Python: в корне **`index.js`** и **`package.json`** — бот на [grammY](https://grammy.dev/) читает **`recipes.json`**, команды `/start`, `/help`, `/recipes`, `/recipe`, кнопки рецептов и (по желанию) **«Открыть книгу»** при заданном **`SITE_URL`** в `.env`.
 
 **Что нужно:** установленный [Node.js](https://nodejs.org/) (лучше LTS, версия 18+).
 
@@ -133,7 +133,7 @@ npm install
 copy .env.example .env
 ```
 
-Открой `.env` и впиши токен после `BOT_TOKEN=` (от [@BotFather](https://t.me/BotFather)). Без пробелов и кавычек вокруг токена.
+Открой `.env` и впиши токен после `BOT_TOKEN=` (от [@BotFather](https://t.me/BotFather)). Без пробелов и кавычек. При необходимости раскомментируй и задай **`SITE_URL`** (как в `bot.py` с кнопкой на GitHub Pages).
 
 3. Запуск бота:
 
