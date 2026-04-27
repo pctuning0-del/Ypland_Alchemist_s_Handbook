@@ -38,6 +38,7 @@ py -m http.server 8000
 | `run_bot.ps1` | Запуск бота с уже прописанным `SITE_URL` (GitHub Pages) |
 | `run_bot.bat` | То же, если PowerShell блокирует `.ps1` (политика выполнения) |
 | `index.js`, `package.json` | Минимальный бот на **Node.js** (grammY), токен `BOT_TOKEN` в `.env` |
+| `start_node_bot.cmd` | Запуск `npm start`, если в терминале не видно `npm` (PATH) |
 | `requirements.txt` | Зависимости Python для бота |
 | `.gitignore` | Исключает служебное (`__pycache__`, `.env` и т.п.) |
 
@@ -141,6 +142,14 @@ npm start
 ```
 
 Остановка: **Ctrl+C**.
+
+**Если пишет, что `npm` / `node` «не распознано»** — терминал не видит Node в `PATH`. Сначала **полностью закрой и снова открой Cursor** (или ПК), либо в **этом** окне PowerShell выполни:
+
+```powershell
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+```
+
+либо запусти в папке проекта двойным кликом / из cmd: **`start_node_bot.cmd`** — он подставляет путь `C:\Program Files\nodejs` и вызывает `npm start`.
 
 Переменная **`BOT_TOKEN`** может задаваться и на хостинге без файла `.env` — главное, чтобы она была в окружении перед `node index.js`.
 
