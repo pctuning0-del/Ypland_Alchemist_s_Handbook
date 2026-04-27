@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Справочник алхимика — Юпленд</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <section class="book" aria-label="Алхимическая книга">
+      <header class="book__header">
+        <div class="book__title">Алхимическая Книга Юпленд</div>
+        <div class="book__subtitle">Тёплый сказочный справочник — чтобы не упустить профит в алхимии</div>
+      </header>
+
+      <div class="spread" aria-label="Разворот книги">
+        <!-- Порядок важен: сетка grid — [левая страница | корешок | правая страница] -->
+        <div class="page page--left" aria-label="Левая страница">
+          <div class="page__ornament" aria-hidden="true"></div>
+
+          <div id="viewList" class="viewPanel">
+            <h1 class="page__h">Рецепты</h1>
+            <p class="page__hint">Коснись рецепта — откроется страница с деталями, как будто перелистнул лист.</p>
+            <ul id="recipeList" class="recipeList"></ul>
+          </div>
+
+          <div id="viewDetail" class="viewPanel viewPanel--hidden" hidden>
+            <button type="button" id="btnBack" class="btnBack">← Назад к списку</button>
+            <h2 id="detailTitle" class="detailTitle"></h2>
+            <p id="detailMeta" class="detailMeta"></p>
+            <div id="detailBody" class="detailBody"></div>
+          </div>
+        </div>
+
+        <div class="spread__spine" aria-hidden="true"></div>
+
+        <aside class="page page--right" aria-label="Правая страница">
+          <div class="page__ornament" aria-hidden="true"></div>
+          <h2 class="page__h2">Подсказка алхимика</h2>
+          <p class="page__text">
+            Саша, держи правило книги: <b>сначала быстрый оборот</b>, потом длинный ритуал.
+            Рецепт с лучшим окном цены — тот, что ты откроешь первым.
+          </p>
+          <div class="seal" aria-label="Печать">
+            ✦ ПЕЧАТЬ ЮПЛЕНДА ✦
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>

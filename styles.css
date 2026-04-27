@@ -1,0 +1,271 @@
+:root {
+  --bg: #0b1020;
+  --paper: #f6efe3;
+  --ink: #2b1c12;
+  --gold: #d7b46a;
+  --leather: #2a1a12;
+  --leather2: #1d120d;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "El Messiri", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background:
+    radial-gradient(1200px 800px at 50% 20%, #1a2450, var(--bg)),
+    radial-gradient(900px 500px at 30% 80%, rgba(215,180,106,0.10), rgba(0,0,0,0));
+  color: white;
+}
+
+.wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.book {
+  width: min(920px, 100%);
+  border-radius: 18px;
+  padding: 18px;
+  background:
+    linear-gradient(180deg, rgba(215,180,106,0.18), rgba(0,0,0,0)),
+    linear-gradient(90deg, rgba(0,0,0,0.35), rgba(0,0,0,0.0) 22%, rgba(0,0,0,0.0) 78%, rgba(0,0,0,0.35)),
+    rgba(255,255,255,0.06);
+  border: 1px solid rgba(215,180,106,0.40);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+  position: relative;
+}
+
+.book__header {
+  padding: 10px 12px 16px;
+}
+
+.book__title {
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  font-size: 22px;
+}
+
+.book__subtitle {
+  margin-top: 6px;
+  opacity: 0.85;
+  font-size: 14px;
+}
+
+.spread {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 18px 1fr;
+  gap: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.10);
+}
+
+.spread__spine {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.00) 30%, rgba(0,0,0,0.10)),
+    linear-gradient(90deg, rgba(0,0,0,0.35), rgba(0,0,0,0.08) 45%, rgba(255,255,255,0.10) 55%, rgba(0,0,0,0.35));
+}
+
+.page {
+  background:
+    radial-gradient(900px 600px at 20% 10%, rgba(255,255,255,0.65), rgba(255,255,255,0.00)),
+    repeating-linear-gradient(0deg, rgba(43,28,18,0.00), rgba(43,28,18,0.00) 10px, rgba(43,28,18,0.015) 10px, rgba(43,28,18,0.015) 11px),
+    var(--paper);
+  color: var(--ink);
+  padding: 18px;
+  position: relative;
+  min-height: 420px;
+}
+
+.page--left {
+  border-right: 1px dashed rgba(0,0,0,0.10);
+  perspective: 1000px;
+}
+
+.page--right {
+  border-left: 1px dashed rgba(0,0,0,0.10);
+}
+
+.page__ornament {
+  position: absolute;
+  inset: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(215,180,106,0.45);
+  pointer-events: none;
+}
+
+.page__h { margin: 0 0 6px; }
+
+.page__h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.page__hint {
+  margin: 0 0 14px;
+  opacity: 0.8;
+}
+
+.viewPanel {
+  position: relative;
+  z-index: 1;
+}
+
+.viewPanel--hidden {
+  display: none !important;
+}
+
+.viewPanel--anim {
+  transform-origin: left center;
+  animation: pageTurnIn 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes pageTurnIn {
+  from {
+    opacity: 0;
+    transform: rotateY(-26deg) translateX(-36px) scale(0.92);
+    filter: blur(2px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(0deg) translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes pageTurnInReduced {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewPanel--anim {
+    animation: pageTurnInReduced 0.25s ease-out;
+  }
+}
+
+.btnBack {
+  margin: 0 0 14px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(43, 28, 18, 0.25);
+  background: rgba(215, 180, 106, 0.22);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnBack:hover {
+  border-color: rgba(215, 180, 106, 0.85);
+  background: rgba(215, 180, 106, 0.35);
+}
+
+.detailTitle {
+  margin: 0 0 8px;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.detailMeta {
+  margin: 0 0 14px;
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.detailBody {
+  line-height: 1.45;
+}
+
+.detailBlock {
+  margin: 0 0 12px;
+}
+
+.detailBlock--story {
+  font-style: italic;
+  opacity: 0.95;
+}
+
+.page__text {
+  margin: 0 0 14px;
+  line-height: 1.35;
+  opacity: 0.95;
+}
+
+.seal {
+  margin-top: 14px;
+  display: inline-block;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(215,180,106,0.16);
+  border: 1px solid rgba(215,180,106,0.55);
+  letter-spacing: 0.6px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.recipeList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.recipeItem {
+  border-radius: 12px;
+  padding: 12px 12px;
+  background: rgba(0,0,0,0.035);
+  border: 1px solid rgba(0,0,0,0.08);
+  cursor: pointer;
+}
+
+.recipeItem:hover {
+  border-color: rgba(215,180,106,0.9);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+.recipeItem__name { font-weight: 750; }
+
+.recipeItem__meta {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.recipeItem--error {
+  cursor: default;
+  border-color: rgba(180, 50, 50, 0.45);
+  background: rgba(180, 50, 50, 0.08);
+  line-height: 1.4;
+}
+
+.recipeItem--error code {
+  font-size: 0.9em;
+}
+
+@media (max-width: 720px) {
+  .spread {
+    grid-template-columns: 1fr;
+  }
+  .spread__spine {
+    display: none;
+  }
+  .page--left,
+  .page--right {
+    border: none;
+  }
+}
+
