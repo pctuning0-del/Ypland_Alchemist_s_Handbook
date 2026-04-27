@@ -3,3 +3,6 @@ __pycache__/
 .Python
 .env
 *.log
+
+# Node.js (бот на grammY)
+node_modules/
