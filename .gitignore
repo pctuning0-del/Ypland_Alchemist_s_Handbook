@@ -6,3 +6,6 @@ __pycache__/
 
 # Node.js (бот на grammY)
 node_modules/
+
+# Временные скачанные ассеты (отладка / анализ вики)
+tools/_yupland_assets/

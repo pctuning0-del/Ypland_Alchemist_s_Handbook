@@ -7,10 +7,14 @@
     "node": ">=18"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "import:yupland": "node tools/build_recipes_from_yupland.mjs tools/yupland_import_manifest.json"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "grammy": "^1.31.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.1"
   }
 }

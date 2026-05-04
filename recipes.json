@@ -1,28 +1,136 @@
 {
   "recipes": [
     {
-      "id": "gold-leaf",
-      "name": "Золотой лист",
-      "profitHint": "+12–18% к профиту",
-      "time": "≈ 3 мин",
-      "ingredients": "Частицы солнца, смола древа, щепотка дерзости.",
-      "story": "Когда рынок замирает, книга шепчет: держи золото ближе к сердцу и не отпускай лист, пока искра цены не вспыхнет."
+      "id": "retsepty-alhimii-hope-water-pump-uncommon2",
+      "section": "Водокачка Надежды (0% > 1000%)",
+      "name": "Hope Water Pump (uncommon)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "2 Hope Water Pump (common); 500 HOPE; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-uncommon2",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmasLHfChhVzziSy48TMHHBJnX9r1Cs3sXYABh5awS6kRD"
     },
     {
-      "id": "moon-dust",
-      "name": "Лунная пыль",
-      "profitHint": "ловим окно цены",
-      "time": "≈ 5 мин",
-      "ingredients": "Пыль луны, серебристый туман, терпение.",
-      "story": "Луна не торопится — и ты не торопись. Профит любит тех, кто ждёт своей полосы на небе."
+      "id": "retsepty-alhimii-hope-water-pump-rare2",
+      "section": "Водокачка Надежды (0% > 1000%)",
+      "name": "Hope Water Pump (rare)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Hope Water Pump (uncommon); 1000 HOPE; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-rare2",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmZEGt8cBTQLUW4K4ez6mREKmF7wHAc6zcXTGPe4t3X5ur"
     },
     {
-      "id": "ember-elixir",
-      "name": "Эликсир уголька",
-      "profitHint": "быстрый оборот",
-      "time": "≈ 2 мин",
-      "ingredients": "Уголёк страсти, капля росы, искра азарта.",
-      "story": "Короткий оборот — как искра: успей, пока жарко. Не жадничай после первой победы."
+      "id": "retsepty-alhimii-hope-water-pump-epic",
+      "section": "Водокачка Надежды (0% > 1000%)",
+      "name": "Hope Water Pump (epic)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Hope Water Pump (rare); 1 Universal potion (legendary); 1500 HOPE; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-epic",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmYqb3zW3R75GobvvVx8cYz6xuGth6YkcJa598KJFxp4fy"
+    },
+    {
+      "id": "retsepty-alhimii-hope-water-pump-legendary",
+      "section": "Водокачка Надежды (0% > 1000%)",
+      "name": "Hope Water Pump (legendary)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Hope Water Pump (epic); 1 Hope Water Pump (common); 1 Universal potion (legendary); 2000 HOPE; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-legendary",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmfMuNoxcmqSQ2ck51ZsaGPVpMdSvV8DDXrSCJGXBKoifX"
+    },
+    {
+      "id": "retsepty-alhimii-hope-water-pump-unique",
+      "section": "Водокачка Надежды (0% > 1000%)",
+      "name": "Hope Water Pump (unique)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Hope Water Pump (legendary); 1 Hope Water Pump (uncommon); 2 Universal potion (legendary); 2500 HOPE; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-unique",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmS5WVK4RFTpXfKBQAyQ7hETPYepxqPvPU8ARHZWTJTHEY"
+    },
+    {
+      "id": "retsepty-alhimii-old-bee-epic",
+      "section": "Медовые пчелы",
+      "name": "Old Bee (epic)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Swarm of Bees (unique); 1 Bees Sweets (Epic); 1 Bee Smoke; 1 Sugar flowers; 1 Universal potion (legendary); 1 MED; 25 BEES; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/old-bee-epic",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmbAioQKopJoGXcQccL2uN6xGRzY4fV8VWBcH2y7qgp8z6"
+    },
+    {
+      "id": "retsepty-alhimii-bee-epic-1-lv",
+      "section": "Медовые пчелы",
+      "name": "Bee (epic - 1 Lv)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Old Bee (epic); 1 Queen Bee (level 1); 1 Beekeeper costume; 25 BEES; 1 Universal potion (legendary); 3 MED; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-1-lv",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmbcdZ38a3CYv8uZtzVy362pGt1udp9aZFCDtE4kSY3acq"
+    },
+    {
+      "id": "retsepty-alhimii-bee-epic-2-lv",
+      "section": "Медовые пчелы",
+      "name": "Bee (epic - 2 Lv)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Bee (epic - 1 Lv); 1 Beekeeper's Costume (Mystic); 1 Kopolevskaya Bee (Level 2); 50 BEES; 1 Universal potion (legendary); 10 MED; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-2-lv",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/Qme68GqFvfRcujpCZkGxjU2y5e1XGXXDr7ybWhuZ4i5DRe"
+    },
+    {
+      "id": "retsepty-alhimii-bee-epic-3-lv",
+      "section": "Медовые пчелы",
+      "name": "Bee (epic - 3 Lv)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Bee (epic - 2 Lv); 75 BEES; 1 Golden DarAi; 1 Universal potion (legendary); 20 MED; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-3-lv",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmXtUUwg5RKuDMWgTYvzHRgfVqfd8tXtP6LGrMaNFttpX2"
+    },
+    {
+      "id": "retsepty-alhimii-bee-epic-4-lv",
+      "section": "Медовые пчелы",
+      "name": "Bee (epic - 4 Lv)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Bee (epic - 3 Lv); 75 BEES; 1 Golden DarAi; 1 Universal potion (legendary); 25 MED; 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-4-lv",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmRqyPK2xfxaP3jcRnD15LQdWyaMxMox36x7WR192sv6Jy"
+    },
+    {
+      "id": "retsepty-alhimii-bee-epic-5-lv",
+      "section": "Медовые пчелы",
+      "name": "Bee (epic - 5 Lv)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Bee (epic - 4 Lv); 150 MED; 75 BEES; 1 Golden DarAi; 1 Universal potion (legendary); 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-5-lv",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmTREU878QPUrSB4ZkAZoRLMnEVdUVuw1237hJ2aBV8VcE"
+    },
+    {
+      "id": "retsepty-alhimii-bee-epic-6-lv",
+      "section": "Медовые пчелы",
+      "name": "Bee (epic - 6 Lv)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Bee (epic - 5 Lv); 1 Universal potion (legendary); 0.1 NEAR",
+      "story": "",
+      "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-6-lv",
+      "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmZ4XMZfaSeemm8XvGsV8FDEwCrsgQAc5hhCj4AB6h7WGR"
     }
   ]
 }

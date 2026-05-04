@@ -185,6 +185,33 @@ body {
   opacity: 0.85;
 }
 
+.detailMedia {
+  margin: 0 0 14px;
+}
+
+.detailImg {
+  width: min(420px, 100%);
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 14px;
+  border: 1px solid rgba(43, 28, 18, 0.22);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.55);
+}
+
+.detailWiki {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.detailWikiLink {
+  color: inherit;
+  opacity: 0.95;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .detailBody {
   line-height: 1.45;
 }
@@ -196,6 +223,53 @@ body {
 .detailBlock--story {
   font-style: italic;
   opacity: 0.95;
+}
+
+.detailBlock--ingredients {
+  margin: 0 0 14px;
+}
+
+.ingredientsLabel {
+  margin-bottom: 6px;
+}
+
+.ingList {
+  margin: 0;
+  padding: 0;
+}
+
+.ingLine {
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+
+.ingLine:last-child {
+  margin-bottom: 0;
+}
+
+button.ingLink {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  opacity: 0.9;
+}
+
+button.ingLink:hover {
+  opacity: 1;
+  color: #6b3f1a;
+}
+
+button.ingLink:focus-visible {
+  outline: 2px solid rgba(215, 180, 106, 0.85);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .page__text {

@@ -11,8 +11,10 @@ from __future__ import annotations
 import html
 import json
 import os
+import re
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 try:
     import telebot
@@ -51,9 +53,11 @@ def format_top_lines(recipes, limit: int | None = 3) -> str:
     items = recipes if limit is None else recipes[:limit]
     for i, r in enumerate(items, 1):
         name = r.get("name", "?")
-        hint = r.get("profitHint", "")
-        t = r.get("time", "")
-        lines.append(f"{i}) {name} — {hint}, {t}")
+        section = (r.get("section", "") or "").strip()
+        if section:
+            lines.append(f"{i}) {name} — {section}")
+        else:
+            lines.append(f"{i}) {name}")
     return "\n".join(lines)
 
 
@@ -64,18 +68,58 @@ def find_recipe(recipe_id: str):
     return None
 
 
+def format_ingredients_telegram_html(raw: str) -> str:
+    """Состав: строки из полей, разделённых ';', количество в начале — жирным (HTML для Telegram)."""
+    s = (raw or "").strip()
+    if not s or s == "—":
+        return "<b>Состав:</b>\n—"
+    parts = [p.strip() for p in s.split(";") if p.strip()]
+    lines: list[str] = ["<b>Состав:</b>"]
+    for p in parts:
+        m = re.match(r"^(\d+(?:[.,]\d+)?)\s+(.+)$", p)
+        if m:
+            qty, rest = m.group(1), m.group(2)
+            lines.append(f"<b>{html.escape(qty)}</b> {html.escape(rest)}")
+        else:
+            lines.append(html.escape(p))
+    return "\n".join(lines)
+
+
 def format_recipe_card(r: dict) -> str:
     """Карточка рецепта в HTML."""
     name = html.escape(str(r.get("name", "?")))
+    section = html.escape(str(r.get("section", "") or ""))
     hint = html.escape(str(r.get("profitHint", "")))
     tm = html.escape(str(r.get("time", "")))
-    ing = html.escape(str(r.get("ingredients", "")))
-    story = html.escape(str(r.get("story", "")))
+    story_raw = str(r.get("story", "") or "").strip()
+    wiki_url = str(r.get("wikiUrl", "") or "").strip()
+    ing_raw = str(r.get("ingredients", "") or "")
+
+    meta_bits = []
+    if section:
+        meta_bits.append(section)
+    if hint:
+        meta_bits.append(hint)
+    if tm and str(tm).strip() and str(tm).strip() not in ("—", "-"):
+        meta_bits.append(tm)
+    meta_line = html.escape(" • ".join(meta_bits))
+
+    wiki_line = ""
+    if wiki_url.startswith("http://") or wiki_url.startswith("https://"):
+        safe_url = quote(wiki_url, safe=":/?#[]@!$&'()*+,;=%")
+        wiki_line = f'\n<a href="{safe_url}">Страница в вики YupLand</a>\n'
+
+    ing_block = format_ingredients_telegram_html(ing_raw)
+    story_block = (
+        f"\n\n<i>{html.escape(story_raw)}</i>" if story_raw and story_raw != "—" else ""
+    )
+
     return (
         f"<b>{name}</b>\n"
-        f"{hint} • {tm}\n\n"
-        f"<b>Состав:</b> {ing}\n\n"
-        f"<i>{story}</i>"
+        f"{meta_line}\n"
+        f"{wiki_line}\n"
+        f"{ing_block}"
+        f"{story_block}"
     )
 
 
@@ -103,8 +147,8 @@ bot = telebot.TeleBot(TOKEN)
 @bot.message_handler(commands=["start"])
 def cmd_start(message):
     text = (
-        "Саша, книга шепчет тихо: не торопись, но и не зевай — профит любит готовых.\n\n"
-        "Зелья для старта дня:\n"
+        "Книга шепчет тихо: не торопись, но и не зевай — в игре выгоду любят готовые.\n\n"
+        "Рецепты для старта:\n"
         f"{format_top_lines(RECIPES)}\n\n"
         "Жми на рецепт ниже — пришлю состав и совет. "
         "Команды: /help, /recipes, /recipe"
@@ -130,7 +174,7 @@ def cmd_help(message):
         "/recipe id — полный текст\n\n"
         f"{site_line}\n"
         f"Доступные id: {html.escape(_IDS)}\n\n"
-        "Пример: <code>/recipe gold-leaf</code>",
+        "Пример: <code>/recipe retsepty-alhimii-hope-water-pump-uncommon2</code>",
         parse_mode="HTML",
     )
 
@@ -149,7 +193,9 @@ def cmd_recipe(message):
     if len(parts) < 2:
         bot.reply_to(
             message,
-            f"Укажи id.\nПример: /recipe gold-leaf\n\nДоступные id: {_IDS}",
+            "Укажи id.\n"
+            "Пример: /recipe retsepty-alhimii-hope-water-pump-uncommon2\n\n"
+            f"Доступные id: {_IDS}",
         )
         return
     rid = parts[1].strip()

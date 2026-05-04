@@ -41,14 +41,33 @@ function escapeHtml(s) {
     .replace(/>/g, "&gt;");
 }
 
+function formatIngredientsTelegramHtml(raw) {
+  const s = String(raw ?? "").trim();
+  if (!s || s === "—") return "<b>Состав:</b>\n—";
+  const parts = s
+    .split(";")
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const lines = ["<b>Состав:</b>"];
+  for (const p of parts) {
+    const m = p.match(/^(\d+(?:[.,]\d+)?)\s+(.+)$/u);
+    if (m) {
+      lines.push(`<b>${escapeHtml(m[1])}</b> ${escapeHtml(m[2])}`);
+    } else {
+      lines.push(escapeHtml(p));
+    }
+  }
+  return lines.join("\n");
+}
+
 function formatTopLines(recipes, limit = null) {
   const items = limit == null ? recipes : recipes.slice(0, limit);
   return items
     .map((r, i) => {
       const name = r.name ?? "?";
-      const hint = r.profitHint ?? "";
-      const t = r.time ?? "";
-      return `${i + 1}) ${name} — ${hint}, ${t}`;
+      const section = String(r.section ?? "").trim();
+      if (section) return `${i + 1}) ${name} — ${section}`;
+      return `${i + 1}) ${name}`;
     })
     .join("\n");
 }
@@ -59,15 +78,34 @@ function findRecipe(id) {
 
 function formatRecipeCard(r) {
   const name = escapeHtml(r.name ?? "?");
+  const section = escapeHtml(r.section ?? "");
   const hint = escapeHtml(r.profitHint ?? "");
   const tm = escapeHtml(r.time ?? "");
-  const ing = escapeHtml(r.ingredients ?? "");
-  const story = escapeHtml(r.story ?? "");
+  const wikiUrl = String(r.wikiUrl ?? "").trim();
+  const storyRaw = String(r.story ?? "").trim();
+
+  const metaBits = [];
+  if (String(section).trim()) metaBits.push(section);
+  if (String(hint).trim()) metaBits.push(hint);
+  const tmStr = String(tm ?? "").trim();
+  if (tmStr && tmStr !== "—" && tmStr !== "-") metaBits.push(tmStr);
+  const metaLine = escapeHtml(metaBits.join(" • "));
+
+  let wikiLine = "";
+  if (/^https?:\/\//u.test(wikiUrl)) {
+    wikiLine = `\n<a href="${escapeHtml(wikiUrl)}">Страница в вики YupLand</a>\n`;
+  }
+
+  const ingBlock = formatIngredientsTelegramHtml(r.ingredients ?? "");
+  const storyBlock =
+    storyRaw && storyRaw !== "—" ? `\n\n<i>${escapeHtml(storyRaw)}</i>` : "";
+
   return (
     `<b>${name}</b>\n` +
-    `${hint} • ${tm}\n\n` +
-    `<b>Состав:</b> ${ing}\n\n` +
-    `<i>${story}</i>`
+    `${metaLine}\n` +
+    `${wikiLine}\n` +
+    `${ingBlock}` +
+    `${storyBlock}`
   );
 }
 
@@ -91,8 +129,8 @@ const bot = new Bot(token);
 
 bot.command("start", async (ctx) => {
   let text =
-    "Саша, книга шепчет тихо: не торопись, но и не зевай — профит любит готовых.\n\n" +
-    "Зелья для старта дня:\n" +
+    "Книга шепчет тихо: не торопись, но и не зевай — в игре выгоду любят готовые.\n\n" +
+    "Рецепты для старта:\n" +
     formatTopLines(RECIPES) +
     "\n\n" +
     "Жми на рецепт ниже — пришлю состав и совет. Команды: /help, /recipes, /recipe";
@@ -115,7 +153,7 @@ bot.command("help", async (ctx) => {
       siteLine +
       "\n" +
       `Доступные id: ${escapeHtml(IDS)}\n\n` +
-      "Пример: <code>/recipe gold-leaf</code>",
+      "Пример: <code>/recipe retsepty-alhimii-hope-water-pump-uncommon2</code>",
     { parse_mode: "HTML" }
   );
 });
@@ -128,7 +166,9 @@ bot.command("recipe", async (ctx) => {
   const text = ctx.message?.text ?? "";
   const parts = text.split(/\s+/);
   if (parts.length < 2) {
-    await ctx.reply(`Укажи id.\nПример: /recipe gold-leaf\n\nДоступные id: ${IDS}`);
+    await ctx.reply(
+      `Укажи id.\nПример: /recipe retsepty-alhimii-hope-water-pump-uncommon2\n\nДоступные id: ${IDS}`
+    );
     return;
   }
   const rid = parts[1].trim();
