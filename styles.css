@@ -110,6 +110,58 @@ body {
   opacity: 0.8;
 }
 
+.listControls {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 10px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.listControls__label {
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.listControls__select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(43, 28, 18, 0.22);
+  background: rgba(255,255,255,0.55);
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+
+.listControls__select:focus-visible {
+  outline: 2px solid rgba(215, 180, 106, 0.85);
+  outline-offset: 2px;
+}
+
+.listControls__count {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  opacity: 0.78;
+}
+
+.recipeSectionTitle {
+  margin: 6px 0 2px;
+  padding: 6px 2px 2px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  opacity: 0.92;
+  border-bottom: 1px dashed rgba(0,0,0,0.15);
+}
+
+.recipeList--section {
+  margin-top: 8px;
+}
+
 .viewPanel {
   position: relative;
   z-index: 1;
@@ -156,8 +208,16 @@ body {
   }
 }
 
-.btnBack {
+.detailTopBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0 0 14px;
+  flex-wrap: nowrap;
+}
+
+.btnBack {
+  margin: 0;
   padding: 8px 12px;
   border-radius: 10px;
   border: 1px solid rgba(43, 28, 18, 0.25);
@@ -171,6 +231,32 @@ body {
 .btnBack:hover {
   border-color: rgba(215, 180, 106, 0.85);
   background: rgba(215, 180, 106, 0.35);
+}
+
+.btnSection {
+  margin: 0 0 0 auto;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(43, 28, 18, 0.25);
+  background: rgba(215, 180, 106, 0.22);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btnSection:hover {
+  border-color: rgba(215, 180, 106, 0.85);
+  background: rgba(215, 180, 106, 0.35);
+}
+
+.btnSection:focus-visible {
+  outline: 2px solid rgba(215, 180, 106, 0.85);
+  outline-offset: 2px;
 }
 
 .detailTitle {
@@ -216,6 +302,10 @@ body {
   line-height: 1.45;
 }
 
+.detailEmpty {
+  padding-top: 6px;
+}
+
 .detailBlock {
   margin: 0 0 12px;
 }
@@ -238,6 +328,38 @@ body {
   padding: 0;
 }
 
+.ingGroups {
+  display: grid;
+  gap: 12px;
+}
+
+.ingGroup {
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(0,0,0,0.02);
+}
+
+.ingGroup__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.ingGroup__badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  border: 1px solid rgba(43, 28, 18, 0.18);
+  background: rgba(215, 180, 106, 0.16);
+  color: var(--ink);
+  text-transform: uppercase;
+}
+
 .ingLine {
   margin: 0 0 4px;
   line-height: 1.4;
@@ -245,6 +367,37 @@ body {
 
 .ingLine:last-child {
   margin-bottom: 0;
+}
+
+.tokenLogo {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  vertical-align: -3px;
+  border-radius: 999px;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.tokenLogo--near {
+  background-image: url("assets/near.png");
+}
+
+.tokenLogo--bees {
+  background-image: url("assets/bees.png");
+}
+
+.tokenLogo--med {
+  background-image: url("assets/med.png");
+}
+
+.tokenLogo--darai {
+  background-image: url("assets/darai.png");
 }
 
 button.ingLink {

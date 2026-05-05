@@ -25,15 +25,14 @@
           <div id="viewList" class="viewPanel">
             <h1 class="page__h">Рецепты</h1>
             <p class="page__hint">Коснись рецепта — откроется страница с деталями, как будто перелистнул лист.</p>
+            <div class="listControls" aria-label="Фильтр по разделам">
+              <label class="listControls__label" for="sectionSelect">Раздел</label>
+              <select id="sectionSelect" class="listControls__select">
+                <option value="">Все разделы</option>
+              </select>
+              <div id="recipeCount" class="listControls__count" aria-live="polite"></div>
+            </div>
             <ul id="recipeList" class="recipeList"></ul>
-          </div>
-
-          <div id="viewDetail" class="viewPanel viewPanel--hidden" hidden>
-            <button type="button" id="btnBack" class="btnBack">← Назад к списку</button>
-            <h2 id="detailTitle" class="detailTitle"></h2>
-            <p id="detailMeta" class="detailMeta"></p>
-            <div id="detailMedia" class="detailMedia" hidden></div>
-            <div id="detailBody" class="detailBody"></div>
           </div>
         </div>
 
@@ -41,13 +40,27 @@
 
         <aside class="page page--right" aria-label="Правая страница">
           <div class="page__ornament" aria-hidden="true"></div>
-          <h2 class="page__h2">Подсказка алхимика</h2>
-          <p class="page__text">
-            Держи правило книги: <b>сначала быстрый оборот</b>, потом длинный ритуал.
-            Рецепт с лучшим окном цены — тот, что ты откроешь первым.
-          </p>
-          <div class="seal" aria-label="Печать">
-            ✦ ПЕЧАТЬ ЮПЛЕНДА ✦
+          <div id="viewDetail" class="viewPanel">
+            <div class="detailTopBar">
+              <button type="button" id="btnBack" class="btnBack">← Очистить страницу</button>
+              <button type="button" id="btnSection" class="btnSection" hidden>Раздел</button>
+            </div>
+            <div id="detailEmpty" class="detailEmpty">
+              <h2 class="page__h2">Страница рецепта</h2>
+              <p class="page__text">
+                Выбери рецепт слева — и справа откроется его страница, как в настоящей книге.
+              </p>
+              <div class="seal" aria-label="Печать">
+                ✦ ПЕЧАТЬ ЮПЛЕНДА ✦
+              </div>
+            </div>
+
+            <div id="detailContent" hidden>
+              <h2 id="detailTitle" class="detailTitle"></h2>
+              <p id="detailMeta" class="detailMeta"></p>
+              <div id="detailMedia" class="detailMedia" hidden></div>
+              <div id="detailBody" class="detailBody"></div>
+            </div>
           </div>
         </aside>
       </div>

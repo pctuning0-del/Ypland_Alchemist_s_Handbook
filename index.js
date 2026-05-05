@@ -60,6 +60,32 @@ function formatIngredientsTelegramHtml(raw) {
   return lines.join("\n");
 }
 
+function formatIngredientsBlocksTelegramHtml(blocks) {
+  if (!Array.isArray(blocks) || !blocks.length) return "<b>Состав:</b>\n—";
+  const label = (t) => {
+    if (t === "chooseOne") return "ВЫБЕРИ ОДИН";
+    if (t === "allRequired") return "ВСЁ ОБЯЗАТЕЛЬНО";
+    return "СОСТАВ";
+  };
+  const out = ["<b>Состав:</b>"];
+  for (const b of blocks) {
+    out.push(`\n<b>${label(String(b?.type ?? ""))}:</b>`);
+    const items = Array.isArray(b?.items) ? b.items : [];
+    if (!items.length) {
+      out.push("—");
+      continue;
+    }
+    for (const it of items) {
+      const qty = String(it?.qty ?? "").trim();
+      const name = String(it?.name ?? "").trim();
+      if (qty && name) out.push(`<b>${escapeHtml(qty)}</b> ${escapeHtml(name)}`);
+      else if (name) out.push(escapeHtml(name));
+      else out.push("—");
+    }
+  }
+  return out.join("\n");
+}
+
 function formatTopLines(recipes, limit = null) {
   const items = limit == null ? recipes : recipes.slice(0, limit);
   return items
@@ -96,7 +122,9 @@ function formatRecipeCard(r) {
     wikiLine = `\n<a href="${escapeHtml(wikiUrl)}">Страница в вики YupLand</a>\n`;
   }
 
-  const ingBlock = formatIngredientsTelegramHtml(r.ingredients ?? "");
+  const ingBlock = Array.isArray(r.ingredientsBlocks) && r.ingredientsBlocks.length
+    ? formatIngredientsBlocksTelegramHtml(r.ingredientsBlocks)
+    : formatIngredientsTelegramHtml(r.ingredients ?? "");
   const storyBlock =
     storyRaw && storyRaw !== "—" ? `\n\n<i>${escapeHtml(storyRaw)}</i>` : "";
 

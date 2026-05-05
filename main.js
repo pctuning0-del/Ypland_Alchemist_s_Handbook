@@ -38,6 +38,11 @@ async function init() {
   const viewList = document.getElementById("viewList");
   const viewDetail = document.getElementById("viewDetail");
   const btnBack = document.getElementById("btnBack");
+  const btnSection = document.getElementById("btnSection");
+  const sectionSelect = document.getElementById("sectionSelect");
+  const recipeCount = document.getElementById("recipeCount");
+  const detailEmpty = document.getElementById("detailEmpty");
+  const detailContent = document.getElementById("detailContent");
   const detailTitle = document.getElementById("detailTitle");
   const detailMeta = document.getElementById("detailMeta");
   const detailMedia = document.getElementById("detailMedia");
@@ -48,6 +53,11 @@ async function init() {
     !viewList ||
     !viewDetail ||
     !btnBack ||
+    !btnSection ||
+    !sectionSelect ||
+    !recipeCount ||
+    !detailEmpty ||
+    !detailContent ||
     !detailTitle ||
     !detailMeta ||
     !detailMedia ||
@@ -71,12 +81,23 @@ async function init() {
     return;
   }
 
-  function showList() {
-    viewDetail.hidden = true;
-    viewDetail.classList.add("viewPanel--hidden");
-    viewList.hidden = false;
-    viewList.classList.remove("viewPanel--hidden");
-    playEnter(viewList);
+  function clearDetail() {
+    detailTitle.textContent = "";
+    detailMeta.textContent = "";
+    detailMeta.hidden = true;
+    detailMedia.hidden = true;
+    detailMedia.innerHTML = "";
+    detailBody.textContent = "";
+    detailContent.hidden = true;
+    detailEmpty.hidden = false;
+    btnSection.hidden = true;
+    btnSection.textContent = "Раздел";
+    playEnter(viewDetail);
+  }
+
+  function sectionLabel(recipe) {
+    const sec = recipe.section ? String(recipe.section).trim() : "";
+    return sec || "Без раздела";
   }
 
   function recipeSubtitle(recipe) {
@@ -88,6 +109,13 @@ async function init() {
   }
 
   function showDetail(recipe) {
+    detailEmpty.hidden = true;
+    detailContent.hidden = false;
+
+    const sec = sectionLabel(recipe);
+    btnSection.textContent = sec;
+    btnSection.hidden = !sec;
+
     detailTitle.textContent = recipe.name;
 
     const sub = recipeSubtitle(recipe);
@@ -125,54 +153,121 @@ async function init() {
     ingLabel.innerHTML = "<strong>Состав:</strong>";
     ingBlock.appendChild(ingLabel);
 
-    const ingList = document.createElement("div");
-    ingList.className = "ingList";
-
-    const rawIng = String(recipe.ingredients ?? "").trim();
-    if (!rawIng || rawIng === "—") {
+    function renderIngLine(qty, name, currentId) {
       const lineEl = document.createElement("div");
       lineEl.className = "ingLine";
-      lineEl.textContent = "—";
-      ingList.appendChild(lineEl);
-    } else {
-      const parts = rawIng
-        .split(";")
-        .map((s) => s.trim())
-        .filter(Boolean);
-      for (const part of parts) {
-        const lineEl = document.createElement("div");
-        lineEl.className = "ingLine";
-        const m = part.match(/^(\d+(?:[.,]\d+)?)\s+(.+)$/u);
-        if (m) {
-          const qtyEl = document.createElement("strong");
-          qtyEl.textContent = m[1];
-          lineEl.appendChild(qtyEl);
-          lineEl.appendChild(document.createTextNode(" "));
-          const rest = m[2].trim();
-          const linked = findRecipeForIngredient(recipes, rest, recipe.id);
-          if (linked) {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "ingLink";
-            btn.setAttribute("aria-label", `Открыть рецепт: ${linked.name}`);
-            btn.textContent = rest;
-            btn.addEventListener("click", (ev) => {
-              ev.preventDefault();
-              ev.stopPropagation();
-              showDetail(linked);
-            });
-            lineEl.appendChild(btn);
-          } else {
-            lineEl.appendChild(document.createTextNode(rest));
-          }
-        } else {
-          lineEl.textContent = part;
-        }
-        ingList.appendChild(lineEl);
+
+      const qtyStr = String(qty ?? "").trim();
+      const nameStr = String(name ?? "").trim();
+
+      function tokenClassForName(n) {
+        const key = String(n ?? "").trim();
+        const up = key.toUpperCase();
+        if (up === "NEAR") return "tokenLogo--near";
+        if (up === "BEES") return "tokenLogo--bees";
+        if (up === "MED") return "tokenLogo--med";
+        if (key === "Golden DarAi") return "tokenLogo--darai";
+        return "";
       }
+
+      const tokenClass = tokenClassForName(nameStr);
+      if (tokenClass) {
+        const logo = document.createElement("span");
+        logo.className = `tokenLogo ${tokenClass}`;
+        logo.setAttribute("aria-hidden", "true");
+        lineEl.appendChild(logo);
+        lineEl.appendChild(document.createTextNode(" "));
+      }
+
+      if (qtyStr) {
+        const qtyEl = document.createElement("strong");
+        qtyEl.textContent = qtyStr;
+        lineEl.appendChild(qtyEl);
+        if (nameStr) lineEl.appendChild(document.createTextNode(" "));
+      }
+
+      if (!nameStr) return lineEl;
+
+      const linked = findRecipeForIngredient(recipes, nameStr, currentId);
+      if (linked) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "ingLink";
+        btn.setAttribute("aria-label", `Открыть рецепт: ${linked.name}`);
+        btn.textContent = nameStr;
+        btn.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          showDetail(linked);
+        });
+        lineEl.appendChild(btn);
+      } else {
+        lineEl.appendChild(document.createTextNode(nameStr));
+      }
+      return lineEl;
     }
 
-    ingBlock.appendChild(ingList);
+    function renderFlatIngredients(rawIng) {
+      const ingList = document.createElement("div");
+      ingList.className = "ingList";
+      const s = String(rawIng ?? "").trim();
+      if (!s || s === "—") {
+        ingList.appendChild(renderIngLine("", "—", recipe.id));
+        return ingList;
+      }
+      const parts = s
+        .split(";")
+        .map((x) => x.trim())
+        .filter(Boolean);
+      for (const part of parts) {
+        const m = part.match(/^(\d+(?:[.,]\d+)?)\s+(.+)$/u);
+        if (m) {
+          ingList.appendChild(renderIngLine(m[1], m[2], recipe.id));
+        } else {
+          ingList.appendChild(renderIngLine("", part, recipe.id));
+        }
+      }
+      return ingList;
+    }
+
+    function blockLabel(type) {
+      if (type === "chooseOne") return "Выбери один";
+      if (type === "allRequired") return "Все обязательны";
+      return "Состав";
+    }
+
+    const blocks = recipe.ingredientsBlocks;
+    if (Array.isArray(blocks) && blocks.length) {
+      const groups = document.createElement("div");
+      groups.className = "ingGroups";
+
+      for (const b of blocks) {
+        const group = document.createElement("div");
+        group.className = "ingGroup";
+
+        const head = document.createElement("div");
+        head.className = "ingGroup__head";
+        const badge = document.createElement("span");
+        badge.className = "ingGroup__badge";
+        badge.textContent = blockLabel(b?.type);
+        head.appendChild(badge);
+        group.appendChild(head);
+
+        const ingList = document.createElement("div");
+        ingList.className = "ingList";
+        const items = Array.isArray(b?.items) ? b.items : [];
+        for (const it of items) {
+          ingList.appendChild(renderIngLine(it?.qty, it?.name, recipe.id));
+        }
+        group.appendChild(ingList);
+        groups.appendChild(group);
+      }
+
+      ingBlock.appendChild(groups);
+    } else {
+      ingBlock.appendChild(renderFlatIngredients(recipe.ingredients));
+    }
+
     detailBody.appendChild(ingBlock);
 
     if (storyRaw && storyRaw !== "—") {
@@ -181,11 +276,6 @@ async function init() {
       storyEl.textContent = storyRaw;
       detailBody.appendChild(storyEl);
     }
-
-    viewList.hidden = true;
-    viewList.classList.add("viewPanel--hidden");
-    viewDetail.hidden = false;
-    viewDetail.classList.remove("viewPanel--hidden");
     playEnter(viewDetail);
   }
 
@@ -195,33 +285,91 @@ async function init() {
     panel.classList.add("viewPanel--anim");
   }
 
+  function renderRecipeItem(targetUl, recipe) {
+    const li = document.createElement("li");
+    li.className = "recipeItem";
+    const sub = recipeSubtitle(recipe);
+    li.innerHTML = `
+      <div class="recipeItem__name">${escapeHtml(recipe.name)}</div>
+      ${sub ? `<div class="recipeItem__meta">${escapeHtml(sub)}</div>` : ""}
+    `;
+    li.addEventListener("click", () => showDetail(recipe));
+    targetUl.appendChild(li);
+  }
+
   function renderList() {
+    const selectedSection = String(sectionSelect.value ?? "");
+
+    const visibleRecipes = selectedSection
+      ? recipes.filter((r) => sectionLabel(r) === selectedSection)
+      : recipes.slice();
+
+    recipeCount.textContent = selectedSection
+      ? `Показано: ${visibleRecipes.length} • Раздел: ${selectedSection}`
+      : `Показано: ${visibleRecipes.length} • Все разделы`;
+
     listEl.innerHTML = "";
-    for (const r of recipes) {
+
+    if (!visibleRecipes.length) {
       const li = document.createElement("li");
-      li.className = "recipeItem";
-      const sub = recipeSubtitle(r);
-      li.innerHTML = `
-        <div class="recipeItem__name">${escapeHtml(r.name)}</div>
-        ${
-          sub
-            ? `<div class="recipeItem__meta">${escapeHtml(sub)}</div>`
-            : ""
-        }
-      `;
-      li.addEventListener("click", () => showDetail(r));
+      li.className = "recipeItem recipeItem--error";
+      li.textContent = "В этом разделе пока нет рецептов.";
       listEl.appendChild(li);
+      return;
+    }
+
+    if (selectedSection) {
+      for (const r of visibleRecipes) {
+        renderRecipeItem(listEl, r);
+      }
+      return;
+    }
+
+    // Группировка по section, сохраняя порядок появления в recipes.json
+    const bySection = new Map();
+    for (const r of visibleRecipes) {
+      const sec = sectionLabel(r);
+      if (!bySection.has(sec)) bySection.set(sec, []);
+      bySection.get(sec).push(r);
+    }
+
+    for (const [sec, items] of bySection.entries()) {
+      const titleLi = document.createElement("li");
+      titleLi.className = "recipeSectionTitle";
+      titleLi.textContent = sec;
+      listEl.appendChild(titleLi);
+
+      const innerUl = document.createElement("ul");
+      innerUl.className = "recipeList recipeList--section";
+      for (const r of items) {
+        renderRecipeItem(innerUl, r);
+      }
+      const innerWrap = document.createElement("li");
+      innerWrap.appendChild(innerUl);
+      listEl.appendChild(innerWrap);
     }
   }
 
-  btnBack.addEventListener("click", showList);
+  btnBack.addEventListener("click", clearDetail);
+  sectionSelect.addEventListener("change", renderList);
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !viewDetail.hidden) {
-      showList();
-    }
+    if (e.key === "Escape") clearDetail();
   });
 
+  // Заполнить выпадающий список разделов (порядок — как в recipes.json)
+  const sectionSet = new Set();
+  for (const r of recipes) {
+    sectionSet.add(sectionLabel(r));
+  }
+  for (const sec of sectionSet) {
+    const opt = document.createElement("option");
+    opt.value = sec;
+    opt.textContent = sec;
+    sectionSelect.appendChild(opt);
+  }
+
+  clearDetail();
   renderList();
 }
 

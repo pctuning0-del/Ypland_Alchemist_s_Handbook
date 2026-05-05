@@ -85,6 +85,37 @@ def format_ingredients_telegram_html(raw: str) -> str:
     return "\n".join(lines)
 
 
+def format_ingredients_blocks_telegram_html(blocks) -> str:
+    """Состав блоками (chooseOne/allRequired) — если ingredientsBlocks есть в recipes.json."""
+    if not isinstance(blocks, list) or not blocks:
+        return "<b>Состав:</b>\n—"
+
+    def label(t: str) -> str:
+        if t == "chooseOne":
+            return "ВЫБЕРИ ОДИН"
+        if t == "allRequired":
+            return "ВСЁ ОБЯЗАТЕЛЬНО"
+        return "СОСТАВ"
+
+    out: list[str] = ["<b>Состав:</b>"]
+    for b in blocks:
+        t = str((b or {}).get("type") or "").strip()
+        out.append(f"\n<b>{label(t)}:</b>")
+        items = (b or {}).get("items")
+        if not isinstance(items, list) or not items:
+            out.append("—")
+            continue
+        for it in items:
+            qty = str((it or {}).get("qty") or "").strip()
+            name = str((it or {}).get("name") or "").strip()
+            if qty and name:
+                out.append(f"<b>{html.escape(qty)}</b> {html.escape(name)}")
+            elif name:
+                out.append(html.escape(name))
+            else:
+                out.append("—")
+    return "\n".join(out)
+
 def format_recipe_card(r: dict) -> str:
     """Карточка рецепта в HTML."""
     name = html.escape(str(r.get("name", "?")))
@@ -94,6 +125,7 @@ def format_recipe_card(r: dict) -> str:
     story_raw = str(r.get("story", "") or "").strip()
     wiki_url = str(r.get("wikiUrl", "") or "").strip()
     ing_raw = str(r.get("ingredients", "") or "")
+    ing_blocks = r.get("ingredientsBlocks")
 
     meta_bits = []
     if section:
@@ -109,7 +141,10 @@ def format_recipe_card(r: dict) -> str:
         safe_url = quote(wiki_url, safe=":/?#[]@!$&'()*+,;=%")
         wiki_line = f'\n<a href="{safe_url}">Страница в вики YupLand</a>\n'
 
-    ing_block = format_ingredients_telegram_html(ing_raw)
+    if isinstance(ing_blocks, list) and ing_blocks:
+        ing_block = format_ingredients_blocks_telegram_html(ing_blocks)
+    else:
+        ing_block = format_ingredients_telegram_html(ing_raw)
     story_block = (
         f"\n\n<i>{html.escape(story_raw)}</i>" if story_raw and story_raw != "—" else ""
     )

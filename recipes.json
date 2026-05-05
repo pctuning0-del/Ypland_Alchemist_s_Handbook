@@ -2,7 +2,7 @@
   "recipes": [
     {
       "id": "retsepty-alhimii-hope-water-pump-uncommon2",
-      "section": "Водокачка Надежды (0% > 1000%)",
+      "section": "Водокачка Надежды",
       "name": "Hope Water Pump (uncommon)",
       "profitHint": "Результат: 1",
       "time": "",
@@ -13,7 +13,7 @@
     },
     {
       "id": "retsepty-alhimii-hope-water-pump-rare2",
-      "section": "Водокачка Надежды (0% > 1000%)",
+      "section": "Водокачка Надежды",
       "name": "Hope Water Pump (rare)",
       "profitHint": "Результат: 1",
       "time": "",
@@ -24,7 +24,7 @@
     },
     {
       "id": "retsepty-alhimii-hope-water-pump-epic",
-      "section": "Водокачка Надежды (0% > 1000%)",
+      "section": "Водокачка Надежды",
       "name": "Hope Water Pump (epic)",
       "profitHint": "Результат: 1",
       "time": "",
@@ -35,7 +35,7 @@
     },
     {
       "id": "retsepty-alhimii-hope-water-pump-legendary",
-      "section": "Водокачка Надежды (0% > 1000%)",
+      "section": "Водокачка Надежды",
       "name": "Hope Water Pump (legendary)",
       "profitHint": "Результат: 1",
       "time": "",
@@ -46,7 +46,7 @@
     },
     {
       "id": "retsepty-alhimii-hope-water-pump-unique",
-      "section": "Водокачка Надежды (0% > 1000%)",
+      "section": "Водокачка Надежды",
       "name": "Hope Water Pump (unique)",
       "profitHint": "Результат: 1",
       "time": "",
@@ -62,6 +62,31 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Swarm of Bees (unique); 1 Bees Sweets (Epic); 1 Bee Smoke; 1 Sugar flowers; 1 Universal potion (legendary); 1 MED; 25 BEES; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Swarm of Bees (unique)" },
+            { "qty": "1", "name": "Bees Sweets (Epic)" },
+            { "qty": "1", "name": "Bee Smoke" },
+            { "qty": "1", "name": "Sugar flowers" },
+            { "qty": "1", "name": "Universal potion (legendary)" }
+          ]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "MED" },
+            { "qty": "25", "name": "BEES" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "0.1", "name": "NEAR" }
+          ]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/old-bee-epic",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmbAioQKopJoGXcQccL2uN6xGRzY4fV8VWBcH2y7qgp8z6"
@@ -73,6 +98,31 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Old Bee (epic); 1 Queen Bee (level 1); 1 Beekeeper costume; 25 BEES; 1 Universal potion (legendary); 3 MED; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "1", "name": "Old Bee (epic)" }]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Queen Bee (level 1)" },
+            { "qty": "1", "name": "Beekeeper costume" },
+            { "qty": "25", "name": "BEES" }
+          ]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Universal potion (legendary)" },
+            { "qty": "3", "name": "MED" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "0.1", "name": "NEAR" }]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-1-lv",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmbcdZ38a3CYv8uZtzVy362pGt1udp9aZFCDtE4kSY3acq"
@@ -84,6 +134,31 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 1 Lv); 1 Beekeeper's Costume (Mystic); 1 Kopolevskaya Bee (Level 2); 50 BEES; 1 Universal potion (legendary); 10 MED; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "1", "name": "Bee (epic - 1 Lv)" }]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Beekeeper's Costume (Mystic)" },
+            { "qty": "1", "name": "Kopolevskaya Bee (Level 2)" },
+            { "qty": "50", "name": "BEES" }
+          ]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Universal potion (legendary)" },
+            { "qty": "10", "name": "MED" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "0.1", "name": "NEAR" }]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-2-lv",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/Qme68GqFvfRcujpCZkGxjU2y5e1XGXXDr7ybWhuZ4i5DRe"
@@ -95,6 +170,30 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 2 Lv); 75 BEES; 1 Golden DarAi; 1 Universal potion (legendary); 20 MED; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "1", "name": "Bee (epic - 2 Lv)" }]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "75", "name": "BEES" },
+            { "qty": "1", "name": "Golden DarAi" }
+          ]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Universal potion (legendary)" },
+            { "qty": "20", "name": "MED" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "0.1", "name": "NEAR" }]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-3-lv",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmXtUUwg5RKuDMWgTYvzHRgfVqfd8tXtP6LGrMaNFttpX2"
@@ -106,6 +205,30 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 3 Lv); 75 BEES; 1 Golden DarAi; 1 Universal potion (legendary); 25 MED; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "1", "name": "Bee (epic - 3 Lv)" }]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "75", "name": "BEES" },
+            { "qty": "1", "name": "Golden DarAi" }
+          ]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Universal potion (legendary)" },
+            { "qty": "25", "name": "MED" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "0.1", "name": "NEAR" }]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-4-lv",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmRqyPK2xfxaP3jcRnD15LQdWyaMxMox36x7WR192sv6Jy"
@@ -117,6 +240,30 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 4 Lv); 150 MED; 75 BEES; 1 Golden DarAi; 1 Universal potion (legendary); 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Bee (epic - 4 Lv)" },
+            { "qty": "150", "name": "MED" }
+          ]
+        },
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "75", "name": "BEES" },
+            { "qty": "1", "name": "Golden DarAi" }
+          ]
+        },
+        {
+          "type": "chooseOne",
+          "items": [{ "qty": "1", "name": "Universal potion (legendary)" }]
+        },
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "0.1", "name": "NEAR" }]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-5-lv",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmTREU878QPUrSB4ZkAZoRLMnEVdUVuw1237hJ2aBV8VcE"
@@ -128,6 +275,20 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 5 Lv); 1 Universal potion (legendary); 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "1", "name": "Bee (epic - 5 Lv)" }]
+        },
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "1", "name": "Universal potion (legendary)" }]
+        },
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "0.1", "name": "NEAR" }]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-6-lv",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmZ4XMZfaSeemm8XvGsV8FDEwCrsgQAc5hhCj4AB6h7WGR"
