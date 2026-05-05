@@ -400,6 +400,163 @@ body {
   background-image: url("assets/darai.png");
 }
 
+.manuscriptOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(5, 7, 14, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.manuscriptOverlay[hidden] {
+  display: none !important;
+}
+
+.manuscriptSheet {
+  width: min(1200px, 100%);
+  height: min(92vh, 920px);
+  border-radius: 18px;
+  overflow: hidden;
+  color: var(--ink);
+  background:
+    radial-gradient(900px 600px at 30% 20%, rgba(255,255,255,0.70), rgba(255,255,255,0.00)),
+    repeating-linear-gradient(0deg, rgba(43,28,18,0.00), rgba(43,28,18,0.00) 10px, rgba(43,28,18,0.012) 10px, rgba(43,28,18,0.012) 11px),
+    var(--paper);
+  border: 1px solid rgba(215,180,106,0.55);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.manuscriptTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px dashed rgba(0,0,0,0.14);
+}
+
+.manuscriptTitle__kicker {
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.manuscriptTitle__main {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.manuscriptClose {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(43, 28, 18, 0.22);
+  background: rgba(215, 180, 106, 0.20);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.manuscriptClose:hover {
+  border-color: rgba(215, 180, 106, 0.85);
+  background: rgba(215, 180, 106, 0.35);
+}
+
+.manuscriptBody {
+  padding: 14px 16px 18px;
+  overflow: auto;
+}
+
+.manuscriptRecipe {
+  margin: 0 0 16px;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(0,0,0,0.02);
+  overflow: hidden;
+}
+
+.manuscriptRecipe__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.manuscriptRecipe__name {
+  font-weight: 950;
+  font-size: 18px;
+}
+
+.manuscriptRecipe__meta {
+  font-size: 13px;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.treeRow {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  min-width: 0;
+}
+
+.manuscriptTreeWrap {
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.treeNode {
+  min-width: 240px;
+  max-width: 320px;
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(255,255,255,0.38);
+}
+
+.treeNode__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+}
+
+.treeNode__title .tokenLogo {
+  width: 22px;
+  height: 22px;
+  vertical-align: 0;
+}
+
+.treeNode__list {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.treeNode__line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.25;
+}
+
+.treeChildren {
+  display: grid;
+  gap: 12px;
+  padding-left: 4px;
+}
+
 button.ingLink {
   margin: 0;
   padding: 0;

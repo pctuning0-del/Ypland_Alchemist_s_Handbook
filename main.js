@@ -47,6 +47,10 @@ async function init() {
   const detailMeta = document.getElementById("detailMeta");
   const detailMedia = document.getElementById("detailMedia");
   const detailBody = document.getElementById("detailBody");
+  const manuscriptOverlay = document.getElementById("manuscriptOverlay");
+  const manuscriptSectionTitle = document.getElementById("manuscriptSectionTitle");
+  const manuscriptBody = document.getElementById("manuscriptBody");
+  const btnManuscriptClose = document.getElementById("btnManuscriptClose");
 
   if (
     !listEl ||
@@ -61,11 +65,18 @@ async function init() {
     !detailTitle ||
     !detailMeta ||
     !detailMedia ||
-    !detailBody
+    !detailBody ||
+    !manuscriptOverlay ||
+    !manuscriptSectionTitle ||
+    !manuscriptBody ||
+    !btnManuscriptClose
   ) {
     console.error("Не хватает элементов разметки для списка/деталей.");
     return;
   }
+
+  // На всякий случай: hidden у оверлея должен реально скрывать его (CSS тоже помогает).
+  manuscriptOverlay.hidden = true;
 
   let recipes = [];
 
@@ -108,7 +119,10 @@ async function init() {
     return "";
   }
 
+  let currentRecipe = null;
+
   function showDetail(recipe) {
+    currentRecipe = recipe;
     detailEmpty.hidden = true;
     detailContent.hidden = false;
 
@@ -170,10 +184,22 @@ async function init() {
         return "";
       }
 
+      const linked = nameStr
+        ? findRecipeForIngredient(recipes, nameStr, currentId)
+        : null;
+
+      // Значок в начале строки:
+      // 1) если ингредиент — другой рецепт и у него есть картинка, показываем её;
+      // 2) иначе показываем токен-иконку для NEAR/BEES/MED/Golden DarAi.
+      const linkedImg = linked?.imageUrl ? String(linked.imageUrl).trim() : "";
       const tokenClass = tokenClassForName(nameStr);
-      if (tokenClass) {
+      const iconUrlOk = /^https?:\/\//u.test(linkedImg);
+      if (iconUrlOk || tokenClass) {
         const logo = document.createElement("span");
-        logo.className = `tokenLogo ${tokenClass}`;
+        logo.className = iconUrlOk ? "tokenLogo" : `tokenLogo ${tokenClass}`;
+        if (iconUrlOk) {
+          logo.style.backgroundImage = `url("${linkedImg}")`;
+        }
         logo.setAttribute("aria-hidden", "true");
         lineEl.appendChild(logo);
         lineEl.appendChild(document.createTextNode(" "));
@@ -188,7 +214,6 @@ async function init() {
 
       if (!nameStr) return lineEl;
 
-      const linked = findRecipeForIngredient(recipes, nameStr, currentId);
       if (linked) {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -285,6 +310,214 @@ async function init() {
     panel.classList.add("viewPanel--anim");
   }
 
+  function parseIngredientsToItems(r) {
+    // Возвращает массив групп: { label, items: [{qty, name}] }
+    const blocks = r?.ingredientsBlocks;
+    if (Array.isArray(blocks) && blocks.length) {
+      const label = (t) => {
+        if (t === "chooseOne") return "ВЫБЕРИ ОДИН";
+        if (t === "allRequired") return "ВСЕ ОБЯЗАТЕЛЬНЫ";
+        return "СОСТАВ";
+      };
+      return blocks.map((b) => ({
+        label: label(String(b?.type ?? "")),
+        items: (Array.isArray(b?.items) ? b.items : []).map((it) => ({
+          qty: String(it?.qty ?? "").trim(),
+          name: String(it?.name ?? "").trim(),
+        })),
+      }));
+    }
+
+    const s = String(r?.ingredients ?? "").trim();
+    if (!s || s === "—") return [{ label: "СОСТАВ", items: [{ qty: "", name: "—" }] }];
+    const parts = s
+      .split(";")
+      .map((x) => x.trim())
+      .filter(Boolean);
+    const items = parts.map((part) => {
+      const m = part.match(/^(\d+(?:[.,]\d+)?)\s+(.+)$/u);
+      if (m) return { qty: m[1], name: m[2].trim() };
+      return { qty: "", name: part };
+    });
+    return [{ label: "СОСТАВ", items }];
+  }
+
+  function makeLogoSpanForIngredient(name, currentId) {
+    const nameStr = String(name ?? "").trim();
+    if (!nameStr) return null;
+
+    // 1) картинка рецепта, если есть
+    const linked = findRecipeForIngredient(recipes, nameStr, currentId);
+    const linkedImg = linked?.imageUrl ? String(linked.imageUrl).trim() : "";
+    if (/^https?:\/\//u.test(linkedImg)) {
+      const logo = document.createElement("span");
+      logo.className = "tokenLogo";
+      logo.style.backgroundImage = `url("${linkedImg}")`;
+      logo.setAttribute("aria-hidden", "true");
+      return logo;
+    }
+
+    // 2) токен-иконки
+    const up = nameStr.toUpperCase();
+    let tokenClass = "";
+    if (up === "NEAR") tokenClass = "tokenLogo--near";
+    else if (up === "BEES") tokenClass = "tokenLogo--bees";
+    else if (up === "MED") tokenClass = "tokenLogo--med";
+    else if (nameStr === "Golden DarAi") tokenClass = "tokenLogo--darai";
+    if (!tokenClass) return null;
+
+    const logo = document.createElement("span");
+    logo.className = `tokenLogo ${tokenClass}`;
+    logo.setAttribute("aria-hidden", "true");
+    return logo;
+  }
+
+  function renderRecipeTree(rootRecipe) {
+    // Горизонтальное дерево: узел -> дети (если ингредиент — другой рецепт, раскрываем)
+    const maxDepth = 6;
+
+    function nodeForRecipe(r, depth, visitedIds) {
+      const row = document.createElement("div");
+      row.className = "treeRow";
+
+      const node = document.createElement("div");
+      node.className = "treeNode";
+
+      const title = document.createElement("div");
+      title.className = "treeNode__title";
+
+      const logo = r?.imageUrl && /^https?:\/\//u.test(String(r.imageUrl))
+        ? (() => {
+            const s = document.createElement("span");
+            s.className = "tokenLogo";
+            s.style.backgroundImage = `url("${String(r.imageUrl)}")`;
+            s.setAttribute("aria-hidden", "true");
+            return s;
+          })()
+        : null;
+      if (logo) title.appendChild(logo);
+
+      const titleText = document.createElement("span");
+      titleText.textContent = String(r?.name ?? "?");
+      title.appendChild(titleText);
+      node.appendChild(title);
+
+      const list = document.createElement("div");
+      list.className = "treeNode__list";
+
+      const groups = parseIngredientsToItems(r);
+      for (const g of groups) {
+        // маленький разделитель-лейбл
+        const lab = document.createElement("div");
+        lab.style.opacity = "0.75";
+        lab.style.fontWeight = "800";
+        lab.style.fontSize = "12px";
+        lab.style.letterSpacing = "0.3px";
+        lab.textContent = g.label;
+        list.appendChild(lab);
+
+        for (const it of g.items) {
+          const line = document.createElement("div");
+          line.className = "treeNode__line";
+          const icon = makeLogoSpanForIngredient(it.name, r?.id);
+          if (icon) line.appendChild(icon);
+          const txt = document.createElement("span");
+          const qty = String(it.qty ?? "").trim();
+          const nm = String(it.name ?? "").trim();
+          txt.textContent = qty ? `${qty} ${nm}` : nm;
+          line.appendChild(txt);
+          list.appendChild(line);
+        }
+      }
+
+      node.appendChild(list);
+      row.appendChild(node);
+
+      if (depth >= maxDepth) return row;
+
+      // дети = ингредиенты, которые являются рецептами
+      const children = [];
+      for (const g of groups) {
+        for (const it of g.items) {
+          const linked = findRecipeForIngredient(recipes, it.name, r?.id);
+          if (!linked) continue;
+          if (visitedIds.has(linked.id)) continue;
+          children.push(linked);
+        }
+      }
+
+      if (!children.length) return row;
+
+      const next = document.createElement("div");
+      next.className = "treeChildren";
+      for (const ch of children) {
+        const nextVisited = new Set(visitedIds);
+        nextVisited.add(ch.id);
+        next.appendChild(nodeForRecipe(ch, depth + 1, nextVisited));
+      }
+      row.appendChild(next);
+      return row;
+    }
+
+    const visited = new Set();
+    if (rootRecipe?.id) visited.add(rootRecipe.id);
+    return nodeForRecipe(rootRecipe, 0, visited);
+  }
+
+  function openManuscriptForSection(sectionName) {
+    const sec = String(sectionName ?? "").trim();
+    if (!sec) return;
+
+    manuscriptSectionTitle.textContent = sec;
+    manuscriptBody.textContent = "";
+
+    const sectionRecipes = recipes.filter((r) => sectionLabel(r) === sec);
+
+    const intro = document.createElement("div");
+    intro.style.margin = "0 0 14px";
+    intro.style.opacity = "0.85";
+    intro.textContent = `Рецептов в разделе: ${sectionRecipes.length}`;
+    manuscriptBody.appendChild(intro);
+
+    if (!sectionRecipes.length) {
+      const p = document.createElement("p");
+      p.textContent = "В этом разделе пока нет рецептов.";
+      manuscriptBody.appendChild(p);
+    } else {
+      for (const r of sectionRecipes) {
+        const wrap = document.createElement("div");
+        wrap.className = "manuscriptRecipe";
+
+        const head = document.createElement("div");
+        head.className = "manuscriptRecipe__head";
+        const nm = document.createElement("div");
+        nm.className = "manuscriptRecipe__name";
+        nm.textContent = r.name;
+        const meta = document.createElement("div");
+        meta.className = "manuscriptRecipe__meta";
+        meta.textContent = r.profitHint ? String(r.profitHint) : "";
+        head.appendChild(nm);
+        head.appendChild(meta);
+        wrap.appendChild(head);
+
+        const tree = document.createElement("div");
+        tree.className = "manuscriptTreeWrap";
+        tree.appendChild(renderRecipeTree(r));
+        wrap.appendChild(tree);
+
+        manuscriptBody.appendChild(wrap);
+      }
+    }
+
+    manuscriptOverlay.hidden = false;
+    playEnter(manuscriptOverlay);
+  }
+
+  function closeManuscript() {
+    manuscriptOverlay.hidden = true;
+    manuscriptBody.textContent = "";
+  }
+
   function renderRecipeItem(targetUl, recipe) {
     const li = document.createElement("li");
     li.className = "recipeItem";
@@ -352,9 +585,17 @@ async function init() {
 
   btnBack.addEventListener("click", clearDetail);
   sectionSelect.addEventListener("change", renderList);
+  btnSection.addEventListener("click", () => {
+    const sec = currentRecipe ? sectionLabel(currentRecipe) : "";
+    openManuscriptForSection(sec);
+  });
+  btnManuscriptClose.addEventListener("click", closeManuscript);
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") clearDetail();
+    if (e.key === "Escape") {
+      if (!manuscriptOverlay.hidden) closeManuscript();
+      else clearDetail();
+    }
   });
 
   // Заполнить выпадающий список разделов (порядок — как в recipes.json)
