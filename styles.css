@@ -400,6 +400,10 @@ body {
   background-image: url("assets/darai.png");
 }
 
+.tokenLogo--hope {
+  background-image: url("assets/hope.png");
+}
+
 .manuscriptOverlay {
   position: fixed;
   inset: 0;

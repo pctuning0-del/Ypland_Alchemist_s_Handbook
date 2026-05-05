@@ -7,6 +7,26 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "2 Hope Water Pump (common); 500 HOPE; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "2", "name": "Hope Water Pump (common)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "500", "name": "HOPE" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "0.1", "name": "NEAR" }
+          ]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-uncommon2",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmasLHfChhVzziSy48TMHHBJnX9r1Cs3sXYABh5awS6kRD"
@@ -18,6 +38,26 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Hope Water Pump (uncommon); 1000 HOPE; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1", "name": "Hope Water Pump (uncommon)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1000", "name": "HOPE" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "0.1", "name": "NEAR" }
+          ]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-rare2",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmZEGt8cBTQLUW4K4ez6mREKmF7wHAc6zcXTGPe4t3X5ur"
@@ -29,6 +69,32 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Hope Water Pump (rare); 1 Universal potion (legendary); 1500 HOPE; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1", "name": "Hope Water Pump (rare)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1", "name": "Universal potion (legendary)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1500", "name": "HOPE" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "0.1", "name": "NEAR" }
+          ]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-epic",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmYqb3zW3R75GobvvVx8cYz6xuGth6YkcJa598KJFxp4fy"
@@ -40,6 +106,38 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Hope Water Pump (epic); 1 Hope Water Pump (common); 1 Universal potion (legendary); 2000 HOPE; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1", "name": "Hope Water Pump (epic)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1", "name": "Hope Water Pump (common)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1", "name": "Universal potion (legendary)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "2000", "name": "HOPE" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "0.1", "name": "NEAR" }
+          ]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-legendary",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmfMuNoxcmqSQ2ck51ZsaGPVpMdSvV8DDXrSCJGXBKoifX"
@@ -51,6 +149,38 @@
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Hope Water Pump (legendary); 1 Hope Water Pump (uncommon); 2 Universal potion (legendary); 2500 HOPE; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1", "name": "Hope Water Pump (legendary)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "1", "name": "Hope Water Pump (uncommon)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "2", "name": "Universal potion (legendary)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "2500", "name": "HOPE" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [
+            { "qty": "0.1", "name": "NEAR" }
+          ]
+        }
+      ],
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/hope-water-pump-unique",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmS5WVK4RFTpXfKBQAyQ7hETPYepxqPvPU8ARHZWTJTHEY"

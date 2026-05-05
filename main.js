@@ -180,6 +180,7 @@ async function init() {
         if (up === "NEAR") return "tokenLogo--near";
         if (up === "BEES") return "tokenLogo--bees";
         if (up === "MED") return "tokenLogo--med";
+        if (up === "HOPE") return "tokenLogo--hope";
         if (key === "Golden DarAi") return "tokenLogo--darai";
         return "";
       }
@@ -363,6 +364,7 @@ async function init() {
     if (up === "NEAR") tokenClass = "tokenLogo--near";
     else if (up === "BEES") tokenClass = "tokenLogo--bees";
     else if (up === "MED") tokenClass = "tokenLogo--med";
+    else if (up === "HOPE") tokenClass = "tokenLogo--hope";
     else if (nameStr === "Golden DarAi") tokenClass = "tokenLogo--darai";
     if (!tokenClass) return null;
 
