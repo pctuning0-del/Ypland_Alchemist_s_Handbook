@@ -120,6 +120,9 @@ def format_recipe_card(r: dict) -> str:
     """Карточка рецепта в HTML."""
     name = html.escape(str(r.get("name", "?")))
     section = html.escape(str(r.get("section", "") or ""))
+    boost = html.escape(str(r.get("boost", "") or "")).strip()
+    rep_to = str(r.get("repTo", "") or "").strip()
+    pl = str(r.get("pl", "") or "").strip()
     hint = html.escape(str(r.get("profitHint", "")))
     tm = html.escape(str(r.get("time", "")))
     story_raw = str(r.get("story", "") or "").strip()
@@ -130,6 +133,13 @@ def format_recipe_card(r: dict) -> str:
     meta_bits = []
     if section:
         meta_bits.append(section)
+    if rep_to:
+        meta_bits.append(
+            f"Репутация: {html.escape(rep_to)}"
+            + (f" ({html.escape(pl)} PL)" if pl else "")
+        )
+    if boost:
+        meta_bits.append(f"Boost {boost}")
     if hint:
         meta_bits.append(hint)
     if tm and str(tm).strip() and str(tm).strip() not in ("—", "-"):

@@ -105,6 +105,9 @@ function findRecipe(id) {
 function formatRecipeCard(r) {
   const name = escapeHtml(r.name ?? "?");
   const section = escapeHtml(r.section ?? "");
+  const boost = escapeHtml(r.boost ?? "");
+  const repTo = escapeHtml(r.repTo ?? "");
+  const pl = escapeHtml(r.pl ?? "");
   const hint = escapeHtml(r.profitHint ?? "");
   const tm = escapeHtml(r.time ?? "");
   const wikiUrl = String(r.wikiUrl ?? "").trim();
@@ -112,6 +115,10 @@ function formatRecipeCard(r) {
 
   const metaBits = [];
   if (String(section).trim()) metaBits.push(section);
+  if (String(repTo).trim()) {
+    metaBits.push(`Репутация: ${repTo}${String(pl).trim() ? ` (${pl} PL)` : ""}`);
+  }
+  if (String(boost).trim()) metaBits.push(`Boost ${boost}`);
   if (String(hint).trim()) metaBits.push(hint);
   const tmStr = String(tm ?? "").trim();
   if (tmStr && tmStr !== "—" && tmStr !== "-") metaBits.push(tmStr);

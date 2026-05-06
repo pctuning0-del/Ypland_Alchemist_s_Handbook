@@ -4,6 +4,7 @@
       "id": "retsepty-alhimii-hope-water-pump-uncommon2",
       "section": "Водокачка Надежды",
       "name": "Hope Water Pump (uncommon)",
+      "boost": "+50%",
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "2 Hope Water Pump (common); 500 HOPE; 0.1 NEAR",
@@ -35,6 +36,7 @@
       "id": "retsepty-alhimii-hope-water-pump-rare2",
       "section": "Водокачка Надежды",
       "name": "Hope Water Pump (rare)",
+      "boost": "+200%",
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Hope Water Pump (uncommon); 1000 HOPE; 0.1 NEAR",
@@ -66,6 +68,7 @@
       "id": "retsepty-alhimii-hope-water-pump-epic",
       "section": "Водокачка Надежды",
       "name": "Hope Water Pump (epic)",
+      "boost": "+400%",
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Hope Water Pump (rare); 1 Universal potion (legendary); 1500 HOPE; 0.1 NEAR",
@@ -103,6 +106,7 @@
       "id": "retsepty-alhimii-hope-water-pump-legendary",
       "section": "Водокачка Надежды",
       "name": "Hope Water Pump (legendary)",
+      "boost": "+600%",
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Hope Water Pump (epic); 1 Hope Water Pump (common); 1 Universal potion (legendary); 2000 HOPE; 0.1 NEAR",
@@ -146,6 +150,7 @@
       "id": "retsepty-alhimii-hope-water-pump-unique",
       "section": "Водокачка Надежды",
       "name": "Hope Water Pump (unique)",
+      "boost": "+1000%",
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Hope Water Pump (legendary); 1 Hope Water Pump (uncommon); 2 Universal potion (legendary); 2500 HOPE; 0.1 NEAR",
@@ -189,6 +194,9 @@
       "id": "retsepty-alhimii-old-bee-epic",
       "section": "Медовые пчелы",
       "name": "Old Bee (epic)",
+      "repFrom": 0,
+      "repTo": 500,
+      "pl": 0,
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Swarm of Bees (unique); 1 Bees Sweets (Epic); 1 Bee Smoke; 1 Sugar flowers; 1 Universal potion (legendary); 1 MED; 25 BEES; 0.1 NEAR",
@@ -225,6 +233,9 @@
       "id": "retsepty-alhimii-bee-epic-1-lv",
       "section": "Медовые пчелы",
       "name": "Bee (epic - 1 Lv)",
+      "repFrom": 500,
+      "repTo": 1000,
+      "pl": 10,
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Old Bee (epic); 1 Queen Bee (level 1); 1 Beekeeper costume; 25 BEES; 1 Universal potion (legendary); 3 MED; 0.1 NEAR",
@@ -261,6 +272,9 @@
       "id": "retsepty-alhimii-bee-epic-2-lv",
       "section": "Медовые пчелы",
       "name": "Bee (epic - 2 Lv)",
+      "repFrom": 1000,
+      "repTo": 2000,
+      "pl": 50,
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 1 Lv); 1 Beekeeper's Costume (Mystic); 1 Kopolevskaya Bee (Level 2); 50 BEES; 1 Universal potion (legendary); 10 MED; 0.1 NEAR",
@@ -297,6 +311,9 @@
       "id": "retsepty-alhimii-bee-epic-3-lv",
       "section": "Медовые пчелы",
       "name": "Bee (epic - 3 Lv)",
+      "repFrom": 2000,
+      "repTo": 3000,
+      "pl": 100,
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 2 Lv); 75 BEES; 1 Golden DarAi; 1 Universal potion (legendary); 20 MED; 0.1 NEAR",
@@ -332,6 +349,9 @@
       "id": "retsepty-alhimii-bee-epic-4-lv",
       "section": "Медовые пчелы",
       "name": "Bee (epic - 4 Lv)",
+      "repFrom": 3000,
+      "repTo": 4000,
+      "pl": 400,
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 3 Lv); 75 BEES; 1 Golden DarAi; 1 Universal potion (legendary); 25 MED; 0.1 NEAR",
@@ -367,6 +387,9 @@
       "id": "retsepty-alhimii-bee-epic-5-lv",
       "section": "Медовые пчелы",
       "name": "Bee (epic - 5 Lv)",
+      "repFrom": 4000,
+      "repTo": 4500,
+      "pl": 800,
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 4 Lv); 150 MED; 75 BEES; 1 Golden DarAi; 1 Universal potion (legendary); 0.1 NEAR",
@@ -402,6 +425,9 @@
       "id": "retsepty-alhimii-bee-epic-6-lv",
       "section": "Медовые пчелы",
       "name": "Bee (epic - 6 Lv)",
+      "repFrom": 4500,
+      "repTo": 4900,
+      "pl": 1200,
       "profitHint": "Результат: 1",
       "time": "",
       "ingredients": "1 Bee (epic - 5 Lv); 1 Universal potion (legendary); 0.1 NEAR",
@@ -422,6 +448,132 @@
       "story": "",
       "wikiUrl": "https://www.yupland.io/wiki/p/nftsender/retsepty-alhimii/bee-epic-6-lv",
       "imageUrl": "https://gateway.dialog-tbot.com/ipfs/QmZ4XMZfaSeemm8XvGsV8FDEwCrsgQAc5hhCj4AB6h7WGR"
+    },
+    {
+      "id": "retsepty-alhimii-universal-potion-legendary-6",
+      "section": "Зелья универсальные",
+      "name": "Universal potion (legendary)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Potion of Elements; 1 Mystic potion (unique); 250 Magic Dust; 1 Dream Potion (legendary); 250 HOPE; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Potion of Elements" },
+            { "qty": "1", "name": "Mystic potion (unique)" },
+            { "qty": "250", "name": "Magic Dust" },
+            { "qty": "1", "name": "Dream Potion (legendary)" }
+          ]
+        },
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "250", "name": "HOPE" }]
+        },
+        {
+          "type": "allRequired",
+          "items": [{ "qty": "0.1", "name": "NEAR" }]
+        }
+      ],
+      "story": "Up universal — 250 HOPE. Тип: Универсальное.",
+      "wikiUrl": "",
+      "imageUrl": ""
+    },
+    {
+      "id": "retsepty-alhimii-universal-potion-legendary-7",
+      "section": "Зелья универсальные",
+      "name": "Universal potion (legendary)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Transformation Potion; 1 Potion of Beauty; 1 Upgrade Potion (legendary); 1 Fire water (common); 100 Magic Dust; 500 HOPE; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Transformation Potion" },
+            { "qty": "1", "name": "Potion of Beauty" },
+            { "qty": "1", "name": "Upgrade Potion (legendary)" },
+            { "qty": "1", "name": "Fire water (common)" },
+            { "qty": "100", "name": "Magic Dust" }
+          ]
+        },
+        { "type": "allRequired", "items": [{ "qty": "500", "name": "HOPE" }] },
+        { "type": "allRequired", "items": [{ "qty": "0.1", "name": "NEAR" }] }
+      ],
+      "story": "Up universal — 500 HOPE. Тип: Универсальное.",
+      "wikiUrl": "",
+      "imageUrl": ""
+    },
+    {
+      "id": "retsepty-alhimii-universal-potion-legendary-8",
+      "section": "Зелья универсальные",
+      "name": "Universal potion (legendary)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Potion of Reversal; 1 Potion of Magic; 1 Mutation Potion; 1 Dried mandrake; 200 Magic Dust; 1 Experience Potion (mystic); 300 HOPE; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Potion of Reversal" },
+            { "qty": "1", "name": "Potion of Magic" },
+            { "qty": "1", "name": "Mutation Potion" },
+            { "qty": "1", "name": "Dried mandrake" },
+            { "qty": "200", "name": "Magic Dust" },
+            { "qty": "1", "name": "Experience Potion (mystic)" }
+          ]
+        },
+        { "type": "allRequired", "items": [{ "qty": "300", "name": "HOPE" }] },
+        { "type": "allRequired", "items": [{ "qty": "0.1", "name": "NEAR" }] }
+      ],
+      "story": "Up universal — 300 HOPE. Тип: Универсальное.",
+      "wikiUrl": "",
+      "imageUrl": ""
+    },
+    {
+      "id": "retsepty-alhimii-universal-potion-legendary-12",
+      "section": "Зелья универсальные",
+      "name": "Universal potion (legendary)",
+      "profitHint": "Результат: 1",
+      "time": "",
+      "ingredients": "1 Crystal Epic Potion; 1 Potion of Rarity; 1 Crystal Rare Potion; 1 Firewater Box (common); 400 Magic Dust; 1 Magic Mercury (1/8); 1 Transformed Respect; 1 Transformed respect (2 lv); 1 Transformed respect (3 lv); 70 HOPE; 0.1 NEAR",
+      "ingredientsBlocks": [
+        {
+          "type": "chooseOne",
+          "items": [
+            { "qty": "1", "name": "Crystal Epic Potion" },
+            { "qty": "1", "name": "Potion of Rarity" },
+            { "qty": "1", "name": "Crystal Rare Potion" },
+            { "qty": "1", "name": "Firewater Box (common)" },
+            { "qty": "400", "name": "Magic Dust" },
+            { "qty": "1", "name": "Magic Mercury (1/8)" },
+            { "qty": "1", "name": "Transformed Respect" },
+            { "qty": "1", "name": "Transformed respect (2 lv)" },
+            { "qty": "1", "name": "Transformed respect (3 lv)" }
+          ]
+        },
+        { "type": "allRequired", "items": [{ "qty": "70", "name": "HOPE" }] },
+        { "type": "allRequired", "items": [{ "qty": "0.1", "name": "NEAR" }] }
+      ],
+      "story": "Up universal — 70 HOPE. Тип: Универсальный.",
+      "wikiUrl": "",
+      "imageUrl": ""
+    },
+    {
+      "id": "retsepty-alhimii-universal-potion-legendary-result5-3",
+      "section": "Зелья универсальные",
+      "name": "Universal potion (legendary)",
+      "profitHint": "Результат: 5",
+      "time": "",
+      "ingredients": "3000 HOPE; 1500 Magic Dust; 0.1 NEAR",
+      "ingredientsBlocks": [
+        { "type": "allRequired", "items": [{ "qty": "3000", "name": "HOPE" }] },
+        { "type": "allRequired", "items": [{ "qty": "1500", "name": "Magic Dust" }] },
+        { "type": "allRequired", "items": [{ "qty": "0.1", "name": "NEAR" }] }
+      ],
+      "story": "5 up universal — 3000 HOPE. Тип: Универсальное.",
+      "wikiUrl": "",
+      "imageUrl": ""
     }
   ]
 }

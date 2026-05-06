@@ -404,6 +404,10 @@ body {
   background-image: url("assets/hope.png");
 }
 
+.tokenLogo--magic-dust {
+  background-image: url("assets/magic_dust.png");
+}
+
 .manuscriptOverlay {
   position: fixed;
   inset: 0;

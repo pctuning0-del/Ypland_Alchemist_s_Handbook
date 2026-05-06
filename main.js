@@ -112,11 +112,20 @@ async function init() {
   }
 
   function recipeSubtitle(recipe) {
+    const bits = [];
     const sec = recipe.section ? String(recipe.section).trim() : "";
-    if (sec) return sec;
+    const boost = recipe.boost ? String(recipe.boost).trim() : "";
     const ph = recipe.profitHint != null ? String(recipe.profitHint).trim() : "";
-    if (ph && ph !== "—") return ph;
-    return "";
+    const tm = recipe.time != null ? String(recipe.time).trim() : "";
+    const repTo = recipe.repTo != null ? String(recipe.repTo).trim() : "";
+    const pl = recipe.pl != null ? String(recipe.pl).trim() : "";
+
+    if (sec) bits.push(sec);
+    if (repTo) bits.push(pl ? `Репутация: ${repTo} (${pl} PL)` : `Репутация: ${repTo}`);
+    if (boost && boost !== "—") bits.push(`Boost ${boost}`);
+    if (ph && ph !== "—") bits.push(ph);
+    if (tm && tm !== "—" && tm !== "-") bits.push(tm);
+    return bits.join(" • ");
   }
 
   let currentRecipe = null;
@@ -181,6 +190,7 @@ async function init() {
         if (up === "BEES") return "tokenLogo--bees";
         if (up === "MED") return "tokenLogo--med";
         if (up === "HOPE") return "tokenLogo--hope";
+        if (key === "Magic Dust") return "tokenLogo--magic-dust";
         if (key === "Golden DarAi") return "tokenLogo--darai";
         return "";
       }
@@ -497,7 +507,13 @@ async function init() {
         nm.textContent = r.name;
         const meta = document.createElement("div");
         meta.className = "manuscriptRecipe__meta";
-        meta.textContent = r.profitHint ? String(r.profitHint) : "";
+        const repTo = r.repTo != null ? String(r.repTo).trim() : "";
+        const pl = r.pl != null ? String(r.pl).trim() : "";
+        meta.textContent = repTo
+          ? (pl ? `Репутация: ${repTo} (${pl} PL)` : `Репутация: ${repTo}`)
+          : (r.boost
+              ? `Boost ${String(r.boost)}`
+              : (r.profitHint ? String(r.profitHint) : ""));
         head.appendChild(nm);
         head.appendChild(meta);
         wrap.appendChild(head);
@@ -523,7 +539,11 @@ async function init() {
   function renderRecipeItem(targetUl, recipe) {
     const li = document.createElement("li");
     li.className = "recipeItem";
-    const sub = recipeSubtitle(recipe);
+    const repTo = recipe.repTo != null ? String(recipe.repTo).trim() : "";
+    const pl = recipe.pl != null ? String(recipe.pl).trim() : "";
+    const boost = recipe.boost ? String(recipe.boost).trim() : "";
+    const repLine = repTo ? (pl ? `Репутация: ${repTo} (${pl} PL)` : `Репутация: ${repTo}`) : "";
+    const sub = repLine || (boost ? `Boost ${boost}` : recipeSubtitle(recipe));
     li.innerHTML = `
       <div class="recipeItem__name">${escapeHtml(recipe.name)}</div>
       ${sub ? `<div class="recipeItem__meta">${escapeHtml(sub)}</div>` : ""}
