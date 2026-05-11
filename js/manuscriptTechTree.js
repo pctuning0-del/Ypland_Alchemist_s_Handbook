@@ -149,12 +149,14 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
   viewport.appendChild(grid);
   wrap.appendChild(viewport);
 
-  /** До 3× для Retina / масштаба вкладки — без перегиба по памяти. */
+  /** До 3× + чуть выше при отдалении манускрипта (масштаб ниже 100%), чтобы не мылилось. */
   function pickDpr() {
     const base = window.devicePixelRatio || 1;
     const vv = window.visualViewport?.scale;
     const scaleComp = vv && vv > 0 && vv < 1 ? 1 / vv : 1;
-    return Math.min(3, Math.max(1, base * Math.min(scaleComp, 1.15)));
+    const ms = Math.max(0.5, Math.min(2.35, getManuscriptZoom()));
+    const msBoost = ms < 1 ? Math.min(1.28, 1 / Math.pow(ms, 0.28)) : 1;
+    return Math.min(3, Math.max(1, base * Math.min(scaleComp, 1.15) * msBoost));
   }
 
   function snapCss(v, dpr) {
@@ -234,29 +236,27 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
 
     const glowW = coreW * 4.2;
     g.lineWidth = glowW;
-    g.strokeStyle = "rgba(215, 180, 106, 0.14)";
+    g.strokeStyle = "rgba(215, 180, 106, 0.22)";
     g.globalAlpha = 1;
     g.stroke();
 
     traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
     g.lineWidth = coreW * 2.1;
-    g.strokeStyle = "rgba(215, 180, 106, 0.28)";
+    g.strokeStyle = "rgba(215, 180, 106, 0.38)";
     g.stroke();
 
     traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
-    const cx = (sx + tx) / 2;
-    const cy = (sy + ty) / 2;
     const grad = g.createLinearGradient(sx, sy, tx, ty);
-    grad.addColorStop(0, "rgba(62, 42, 28, 0.92)");
-    grad.addColorStop(0.45, "rgba(43, 28, 18, 0.96)");
-    grad.addColorStop(1, "rgba(28, 18, 12, 0.98)");
+    grad.addColorStop(0, "rgba(52, 34, 22, 0.97)");
+    grad.addColorStop(0.45, "rgba(38, 25, 16, 0.99)");
+    grad.addColorStop(1, "rgba(22, 14, 10, 1)");
     g.lineWidth = coreW;
     g.strokeStyle = grad;
     g.stroke();
 
     traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
-    g.lineWidth = Math.max(0.85, coreW * 0.38);
-    g.strokeStyle = "rgba(255, 248, 235, 0.35)";
+    g.lineWidth = Math.max(0.9, coreW * 0.4);
+    g.strokeStyle = "rgba(255, 248, 235, 0.42)";
     g.stroke();
 
     const dotR = Math.max(2.4, coreW * 0.85);
@@ -299,9 +299,14 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
         ? Math.min(1.35, window.visualViewport.scale)
         : 1;
     const msZ = Math.max(0.5, Math.min(2.35, getManuscriptZoom()));
+    // zoom на #manuscriptZoomScaler уменьшает всё на экране — компенсируем толщину штриха.
+    const zoomScreenBoost = msZ < 1 ? 1 / Math.pow(msZ, 0.78) : 1;
     const coreW = Math.min(
-      4.2,
-      Math.max(2.65, (3.15 * pageScale) / Math.pow(msZ, 0.35))
+      5.6,
+      Math.max(
+        3.05,
+        (3.35 * pageScale * zoomScreenBoost) / Math.pow(msZ, 0.18)
+      )
     );
 
     const nodeEls = viewport.querySelectorAll(".techNode[data-tree-uid]");
