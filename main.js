@@ -50,6 +50,12 @@ async function init() {
   const manuscriptOverlay = document.getElementById("manuscriptOverlay");
   const manuscriptSectionTitle = document.getElementById("manuscriptSectionTitle");
   const manuscriptBody = document.getElementById("manuscriptBody");
+  const manuscriptZoomViewport = document.getElementById("manuscriptZoomViewport");
+  const manuscriptZoomContent = document.getElementById("manuscriptZoomContent");
+  const btnMsZoomOut = document.getElementById("btnMsZoomOut");
+  const btnMsZoomIn = document.getElementById("btnMsZoomIn");
+  const btnMsZoomReset = document.getElementById("btnMsZoomReset");
+  const manuscriptZoomLabel = document.getElementById("manuscriptZoomLabel");
   const btnManuscriptClose = document.getElementById("btnManuscriptClose");
 
   if (
@@ -69,6 +75,12 @@ async function init() {
     !manuscriptOverlay ||
     !manuscriptSectionTitle ||
     !manuscriptBody ||
+    !manuscriptZoomViewport ||
+    !manuscriptZoomContent ||
+    !btnMsZoomOut ||
+    !btnMsZoomIn ||
+    !btnMsZoomReset ||
+    !manuscriptZoomLabel ||
     !btnManuscriptClose
   ) {
     console.error("Не хватает элементов разметки для списка/деталей.");
@@ -77,6 +89,49 @@ async function init() {
 
   // На всякий случай: hidden у оверлея должен реально скрывать его (CSS тоже помогает).
   manuscriptOverlay.hidden = true;
+
+  /** Масштаб только содержимого манускрипта (не всей страницы). */
+  let manuscriptZoom = 1;
+  const MS_Z_MIN = 0.5;
+  const MS_Z_MAX = 2.25;
+  const MS_Z_STEP = 0.1;
+
+  function applyManuscriptZoom(next) {
+    manuscriptZoom = Math.min(MS_Z_MAX, Math.max(MS_Z_MIN, next));
+    const z = manuscriptZoom;
+    manuscriptZoomContent.style.zoom = "";
+    manuscriptZoomContent.style.transform = "";
+    if (typeof CSS !== "undefined" && CSS.supports && CSS.supports("zoom", "1")) {
+      manuscriptZoomContent.style.zoom = String(z);
+    } else {
+      manuscriptZoomContent.style.transform = `scale(${z})`;
+    }
+    manuscriptZoomLabel.textContent = `${Math.round(z * 100)}%`;
+    window.dispatchEvent(new Event("resize"));
+  }
+
+  btnMsZoomOut.addEventListener("click", () => {
+    applyManuscriptZoom(manuscriptZoom - MS_Z_STEP);
+  });
+  btnMsZoomIn.addEventListener("click", () => {
+    applyManuscriptZoom(manuscriptZoom + MS_Z_STEP);
+  });
+  btnMsZoomReset.addEventListener("click", () => {
+    applyManuscriptZoom(1);
+  });
+
+  manuscriptZoomViewport.addEventListener(
+    "wheel",
+    (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -MS_Z_STEP : MS_Z_STEP;
+      applyManuscriptZoom(manuscriptZoom + delta);
+    },
+    { passive: false }
+  );
+
+  applyManuscriptZoom(1);
 
   let recipes = [];
 
@@ -685,7 +740,8 @@ async function init() {
     if (!sec) return;
 
     manuscriptSectionTitle.textContent = sec;
-    manuscriptBody.textContent = "";
+    manuscriptZoomContent.replaceChildren();
+    applyManuscriptZoom(1);
 
     const sectionRecipes = recipes.filter((r) => sectionLabel(r) === sec);
 
@@ -693,12 +749,12 @@ async function init() {
     intro.style.margin = "0 0 14px";
     intro.style.opacity = "0.85";
     intro.textContent = `Рецептов в разделе: ${sectionRecipes.length}`;
-    manuscriptBody.appendChild(intro);
+    manuscriptZoomContent.appendChild(intro);
 
     if (!sectionRecipes.length) {
       const p = document.createElement("p");
       p.textContent = "В этом разделе пока нет рецептов.";
-      manuscriptBody.appendChild(p);
+      manuscriptZoomContent.appendChild(p);
     } else {
       for (const r of sectionRecipes) {
         const wrap = document.createElement("div");
@@ -727,7 +783,7 @@ async function init() {
         tree.appendChild(renderRecipeTechTree(r));
         wrap.appendChild(tree);
 
-        manuscriptBody.appendChild(wrap);
+        manuscriptZoomContent.appendChild(wrap);
       }
     }
 
@@ -737,7 +793,8 @@ async function init() {
 
   function closeManuscript() {
     manuscriptOverlay.hidden = true;
-    manuscriptBody.textContent = "";
+    manuscriptZoomContent.replaceChildren();
+    applyManuscriptZoom(1);
   }
 
   function renderRecipeItem(targetUl, recipe) {

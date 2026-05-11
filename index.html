@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=2026-05-11-7" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-11-8" />
 </head>
 <body>
   <main class="wrap">
@@ -82,10 +82,22 @@
         </div>
         <button type="button" id="btnManuscriptClose" class="manuscriptClose" aria-label="Закрыть">✕</button>
       </div>
-      <div id="manuscriptBody" class="manuscriptBody"></div>
+      <div id="manuscriptBody" class="manuscriptBody">
+        <div class="manuscriptZoomBar" aria-label="Масштаб содержимого манускрипта">
+          <span class="manuscriptZoomBar__label">Масштаб:</span>
+          <button type="button" id="btnMsZoomOut" class="manuscriptZoomBtn" aria-label="Уменьшить">−</button>
+          <span id="manuscriptZoomLabel" class="manuscriptZoomLabel">100%</span>
+          <button type="button" id="btnMsZoomIn" class="manuscriptZoomBtn" aria-label="Увеличить">+</button>
+          <button type="button" id="btnMsZoomReset" class="manuscriptZoomBtn manuscriptZoomBtn--text">Сброс</button>
+          <span class="manuscriptZoomBar__hint" title="Удерживай Ctrl и крути колёсико над областью манускрипта">Ctrl + колёсико</span>
+        </div>
+        <div id="manuscriptZoomViewport" class="manuscriptZoomViewport">
+          <div id="manuscriptZoomContent" class="manuscriptZoomContent"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <script src="main.js?v=2026-05-11-7"></script>
+  <script src="main.js?v=2026-05-11-8"></script>
 </body>
 </html>
