@@ -669,6 +669,15 @@ body {
   scrollbar-color: rgba(215, 180, 106, 0.55) rgba(43, 28, 18, 0.06);
 }
 
+/* Масштаб только этого блока: линии тех-дерева и текст в одном subtree (Canvas + DOM). */
+.manuscriptZoomScaler {
+  transform-origin: top left;
+  display: inline-block;
+  min-width: 100%;
+  vertical-align: top;
+  box-sizing: border-box;
+}
+
 .manuscriptZoomViewport::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -897,23 +906,19 @@ body {
   padding: 6px 2px;
 }
 
-.techTreeLines {
+.techTreeConnectors {
   position: absolute;
   inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  overflow: visible;
-  shape-rendering: geometricPrecision;
-}
-
-.techTreeLine {
-  fill: none;
-  stroke: rgba(43, 28, 18, 0.78);
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  z-index: 1;
 }
 
 .techTreeGrid {
   position: relative;
+  z-index: 2;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(280px, 380px);
