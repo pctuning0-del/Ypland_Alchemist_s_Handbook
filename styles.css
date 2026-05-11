@@ -916,6 +916,16 @@ body {
   isolation: isolate;
 }
 
+.techTreeConnectors--fx {
+  filter: drop-shadow(0 0 1px rgba(215, 180, 106, 0.35));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .techTreeConnectors--fx {
+    filter: none;
+  }
+}
+
 /* Рамки блоков состава в узлах дерева — чуть заметнее на пергаменте при малом масштабе */
 .manuscriptOverlay .techNode .ingGroup {
   border-color: rgba(43, 28, 18, 0.14);

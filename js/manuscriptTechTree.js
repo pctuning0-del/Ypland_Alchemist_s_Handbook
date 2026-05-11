@@ -1,5 +1,5 @@
 /**
- * Тех-дерево манускрипта: колонки по глубине + связи на Canvas (HiDPI, скругления, многослойный stroke).
+ * Тех-дерево манускрипта: DOM-сетка + Canvas-связи с усиленными визуальными эффектами (анимация, свечение, «поток»).
  */
 export function renderRecipeTechTree(rootRecipe, ctx) {
   const {
@@ -10,6 +10,10 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     makeLogoSpanForIngredient,
     showDetail,
   } = ctx;
+
+  const prefersReducedMotion =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const maxDepth = 6;
   const levels = [];
@@ -68,7 +72,7 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
   viewport.className = "techTreeViewport";
 
   const canvas = document.createElement("canvas");
-  canvas.className = "techTreeConnectors";
+  canvas.className = "techTreeConnectors techTreeConnectors--fx";
   canvas.setAttribute("aria-hidden", "true");
 
   const grid = document.createElement("div");
@@ -149,7 +153,6 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
   viewport.appendChild(grid);
   wrap.appendChild(viewport);
 
-  /** До 3× + чуть выше при отдалении манускрипта (масштаб ниже 100%), чтобы не мылилось. */
   function pickDpr() {
     const base = window.devicePixelRatio || 1;
     const vv = window.visualViewport?.scale;
@@ -163,10 +166,6 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     return Math.round(v * dpr) / dpr;
   }
 
-  /**
-   * Прямоугольник узла в координатах содержимого techTreeViewport (учёт scrollLeft/scrollTop).
-   * Одна система координат с canvas размером scrollWidth × scrollHeight — без «уползания» при масштабе.
-   */
   function nodeRectContentCoords(el) {
     const er = el.getBoundingClientRect();
     const vr = viewport.getBoundingClientRect();
@@ -194,116 +193,137 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     return { sx, sy, midX, ty, tx };
   }
 
-  /**
-   * Ортогональный путь H → V → H со скруглениями на локтях.
-   * Предполагается типичный порядок: sx < midX, якоря слева направо.
-   */
-  function traceRoundedElbow(g, sx, sy, midX, ty, tx, radiusCss) {
+  /** Path2D ортогонального пути со скруглениями — один раз строим, много раз штрихуем. */
+  function buildElbowPath2D(sx, sy, midX, ty, tx, radiusCss) {
     const down = ty >= sy;
     const right = tx >= midX;
     const dx1 = Math.abs(midX - sx);
     const dy = Math.abs(ty - sy);
     const dx2 = Math.abs(tx - midX);
 
-    g.beginPath();
-    g.moveTo(sx, sy);
+    const p = new Path2D();
+    p.moveTo(sx, sy);
 
     if (dx1 < 2 || dy < 2 || dx2 < 2) {
-      g.lineTo(midX, sy);
-      g.lineTo(midX, ty);
-      g.lineTo(tx, ty);
-      return;
+      p.lineTo(midX, sy);
+      p.lineTo(midX, ty);
+      p.lineTo(tx, ty);
+      return p;
     }
 
     let r = Math.min(radiusCss, dx1 * 0.42, dy * 0.42, dx2 * 0.42);
     r = Math.max(2.5, Math.min(r, dx1 * 0.48, dy * 0.48, dx2 * 0.48));
 
-    g.lineTo(midX - r, sy);
-    if (down) g.quadraticCurveTo(midX, sy, midX, sy + r);
-    else g.quadraticCurveTo(midX, sy, midX, sy - r);
+    p.lineTo(midX - r, sy);
+    if (down) p.quadraticCurveTo(midX, sy, midX, sy + r);
+    else p.quadraticCurveTo(midX, sy, midX, sy - r);
 
-    if (down) g.lineTo(midX, ty - r);
-    else g.lineTo(midX, ty + r);
+    if (down) p.lineTo(midX, ty - r);
+    else p.lineTo(midX, ty + r);
 
     if (right) {
-      g.quadraticCurveTo(midX, ty, midX + r, ty);
-      g.lineTo(tx, ty);
+      p.quadraticCurveTo(midX, ty, midX + r, ty);
+      p.lineTo(tx, ty);
     } else {
-      g.quadraticCurveTo(midX, ty, midX - r, ty);
-      g.lineTo(tx, ty);
+      p.quadraticCurveTo(midX, ty, midX - r, ty);
+      p.lineTo(tx, ty);
     }
+    return p;
   }
 
-  function strokeConnectorLayers(g, sx, sy, midX, ty, tx, coreW) {
-    const r = Math.min(10, Math.max(4, coreW * 2.2));
-
-    traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
+  function drawConnectorFx(g, path, coreW, timeMs, edgeIdx, sx, sy, tx, ty, midX) {
+    const pulse = 0.85 + 0.15 * Math.sin(timeMs * 0.0018 + edgeIdx * 1.1);
+    const flow = prefersReducedMotion ? 0 : timeMs * 0.045;
 
     g.lineJoin = "round";
     g.lineCap = "round";
 
-    const glowW = coreW * 4.2;
-    g.lineWidth = glowW;
-    g.strokeStyle = "rgba(215, 180, 106, 0.22)";
-    g.globalAlpha = 1;
-    g.stroke();
+    g.shadowColor = "rgba(215, 180, 106, 0.55)";
+    g.shadowBlur = 12 * pulse;
+    g.shadowOffsetX = 0;
+    g.shadowOffsetY = 0;
+    g.strokeStyle = `rgba(215, 180, 106, ${0.18 * pulse})`;
+    g.lineWidth = coreW * 5.2;
+    g.stroke(path);
+    g.shadowBlur = 0;
 
-    traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
-    g.lineWidth = coreW * 2.1;
-    g.strokeStyle = "rgba(215, 180, 106, 0.38)";
-    g.stroke();
+    g.strokeStyle = `rgba(255, 220, 150, ${0.24 * pulse})`;
+    g.lineWidth = coreW * 2.8;
+    g.stroke(path);
 
-    traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
-    const grad = g.createLinearGradient(sx, sy, tx, ty);
-    grad.addColorStop(0, "rgba(52, 34, 22, 0.97)");
-    grad.addColorStop(0.45, "rgba(38, 25, 16, 0.99)");
-    grad.addColorStop(1, "rgba(22, 14, 10, 1)");
-    g.lineWidth = coreW;
+    const ox = Math.sin(timeMs * 0.0005 + edgeIdx) * 14;
+    const oy = Math.cos(timeMs * 0.00048 + edgeIdx * 0.7) * 14;
+    const grad = g.createLinearGradient(sx + ox, sy + oy, tx - ox, ty - oy);
+    grad.addColorStop(0, `rgba(72, 48, 30, ${0.92 + 0.06 * pulse})`);
+    grad.addColorStop(0.5, "rgba(38, 24, 15, 0.98)");
+    grad.addColorStop(1, "rgba(18, 11, 8, 1)");
+
     g.strokeStyle = grad;
-    g.stroke();
+    g.lineWidth = coreW * 1.05;
+    g.stroke(path);
 
-    traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
-    g.lineWidth = Math.max(0.9, coreW * 0.4);
-    g.strokeStyle = "rgba(255, 248, 235, 0.42)";
-    g.stroke();
+    g.strokeStyle = "rgba(255, 252, 245, 0.5)";
+    g.lineWidth = Math.max(0.75, coreW * 0.36);
+    g.stroke(path);
 
-    const dotR = Math.max(2.4, coreW * 0.85);
-    g.fillStyle = "rgba(43, 28, 18, 0.95)";
+    if (!prefersReducedMotion) {
+      g.save();
+      g.setLineDash([7, 10]);
+      g.lineDashOffset = -flow;
+      g.strokeStyle = `rgba(255, 214, 120, ${0.55 + 0.2 * Math.sin(timeMs * 0.003 + edgeIdx)})`;
+      g.lineWidth = Math.max(1.2, coreW * 0.55);
+      g.stroke(path);
+      g.setLineDash([]);
+      g.restore();
+    }
+
+    const dotR = Math.max(2.6, coreW * 0.9) * (0.92 + 0.08 * pulse);
+    const ring = dotR * 1.65;
+    const midY = (sy + ty) / 2;
+
+    g.fillStyle = `rgba(43, 28, 18, ${0.88 + 0.1 * pulse})`;
     g.beginPath();
     g.arc(sx, sy, dotR, 0, Math.PI * 2);
     g.fill();
+    g.strokeStyle = `rgba(255, 214, 130, ${0.35 + 0.2 * pulse})`;
+    g.lineWidth = 1.2;
     g.beginPath();
-    g.arc(tx, ty, dotR * 0.92, 0, Math.PI * 2);
-    g.fill();
-    g.fillStyle = "rgba(255, 248, 235, 0.5)";
+    g.arc(sx, sy, ring, 0, Math.PI * 2);
+    g.stroke();
+
+    g.fillStyle = `rgba(43, 28, 18, ${0.9 + 0.08 * pulse})`;
     g.beginPath();
-    g.arc(sx - dotR * 0.25, sy - dotR * 0.25, dotR * 0.35, 0, Math.PI * 2);
+    g.arc(tx, ty, dotR * 0.95, 0, Math.PI * 2);
     g.fill();
+    g.strokeStyle = `rgba(255, 214, 130, ${0.3 + 0.18 * pulse})`;
+    g.beginPath();
+    g.arc(tx, ty, ring * 0.95, 0, Math.PI * 2);
+    g.stroke();
+
+    g.fillStyle = "rgba(255, 248, 235, 0.55)";
+    g.beginPath();
+    g.arc(sx - dotR * 0.2, sy - dotR * 0.2, dotR * 0.32, 0, Math.PI * 2);
+    g.fill();
+
+    if (!prefersReducedMotion) {
+      const tw = 0.5 + 0.5 * Math.sin(timeMs * 0.004 + edgeIdx * 2.1);
+      const rg = g.createRadialGradient(midX, midY, 0, midX, midY, 16);
+      rg.addColorStop(0, `rgba(255, 230, 160, ${0.32 * tw})`);
+      rg.addColorStop(1, "rgba(255, 230, 160, 0)");
+      g.fillStyle = rg;
+      g.beginPath();
+      g.arc(midX, midY, 16, 0, Math.PI * 2);
+      g.fill();
+    }
   }
 
-  function redrawLines() {
+  let lastGeo = { cssW: 0, cssH: 0, dpr: 1, snap: (x) => x, coreW: 3.5, pos: new Map() };
+
+  function measureGeometry() {
     const dpr = pickDpr();
     const snap = (v) => snapCss(v, dpr);
     const cssW = Math.max(1, viewport.scrollWidth);
     const cssH = Math.max(1, viewport.scrollHeight);
-    const bw = Math.max(1, Math.round(cssW * dpr));
-    const bh = Math.max(1, Math.round(cssH * dpr));
-    canvas.width = bw;
-    canvas.height = bh;
-    canvas.style.left = "0";
-    canvas.style.top = "0";
-    canvas.style.width = `${cssW}px`;
-    canvas.style.height = `${cssH}px`;
-    canvas.style.right = "auto";
-    canvas.style.bottom = "auto";
-
-    const g = canvas.getContext("2d", { alpha: true });
-    if (!g) return;
-
-    g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    g.clearRect(0, 0, cssW, cssH);
-    g.imageSmoothingEnabled = true;
-    g.imageSmoothingQuality = "high";
 
     const pageScale =
       window.visualViewport && window.visualViewport.scale > 0
@@ -313,10 +333,7 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     const zoomScreenBoost = msZ < 1 ? 1 / Math.pow(msZ, 0.78) : 1;
     const coreW = Math.min(
       5.6,
-      Math.max(
-        3.05,
-        (3.35 * pageScale * zoomScreenBoost) / Math.pow(msZ, 0.18)
-      )
+      Math.max(3.05, (3.35 * pageScale * zoomScreenBoost) / Math.pow(msZ, 0.18))
     );
 
     const nodeEls = viewport.querySelectorAll(".techNode[data-tree-uid]");
@@ -333,31 +350,102 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
       });
     });
 
+    lastGeo = { cssW, cssH, dpr, snap, coreW, pos };
+  }
+
+  function sizeCanvas() {
+    const { cssW, cssH, dpr } = lastGeo;
+    const bw = Math.max(1, Math.round(cssW * dpr));
+    const bh = Math.max(1, Math.round(cssH * dpr));
+    canvas.width = bw;
+    canvas.height = bh;
+    canvas.style.left = "0";
+    canvas.style.top = "0";
+    canvas.style.width = `${cssW}px`;
+    canvas.style.height = `${cssH}px`;
+    canvas.style.right = "auto";
+    canvas.style.bottom = "auto";
+  }
+
+  function paintFrame(timeMs) {
+    measureGeometry();
+    sizeCanvas();
+
+    const g = canvas.getContext("2d", { alpha: true });
+    if (!g) return;
+
+    const { cssW, cssH, dpr, coreW, pos } = lastGeo;
+
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, cssW, cssH);
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = "high";
+
+    let ei = 0;
     for (const e of edges) {
       const a = pos.get(e.fromUid);
       const b = pos.get(e.toUid);
       if (!a || !b) continue;
       let { sx, sy, midX, ty, tx } = elbowGeometry(a, b);
+      sx = lastGeo.snap(sx);
+      sy = lastGeo.snap(sy);
+      midX = lastGeo.snap(midX);
+      ty = lastGeo.snap(ty);
+      tx = lastGeo.snap(tx);
 
-      sx = snap(sx);
-      sy = snap(sy);
-      midX = snap(midX);
-      ty = snap(ty);
-      tx = snap(tx);
-
-      strokeConnectorLayers(g, sx, sy, midX, ty, tx, coreW);
+      const r = Math.min(10, Math.max(4, coreW * 2.2));
+      const path = buildElbowPath2D(sx, sy, midX, ty, tx, r);
+      drawConnectorFx(g, path, coreW, timeMs, ei, sx, sy, tx, ty, midX);
+      ei += 1;
     }
   }
 
+  let rafId = 0;
+  const t0 = performance.now();
+
+  function scheduleStaticRedraw() {
+    measureGeometry();
+    sizeCanvas();
+    paintFrame(prefersReducedMotion ? 0 : performance.now() - t0);
+  }
+
+  function tick(now) {
+    paintFrame(now - t0);
+    if (!prefersReducedMotion && !document.hidden) {
+      rafId = requestAnimationFrame(tick);
+    }
+  }
+
+  function startFxLoop() {
+    cancelAnimationFrame(rafId);
+    if (prefersReducedMotion || document.hidden) {
+      scheduleStaticRedraw();
+      return;
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
   requestAnimationFrame(() => {
-    redrawLines();
-    requestAnimationFrame(() => redrawLines());
+    scheduleStaticRedraw();
+    requestAnimationFrame(() => {
+      scheduleStaticRedraw();
+      startFxLoop();
+    });
   });
-  const ro = new ResizeObserver(() => redrawLines());
+
+  const ro = new ResizeObserver(() => {
+    scheduleStaticRedraw();
+    if (!prefersReducedMotion) startFxLoop();
+  });
   ro.observe(viewport);
+
   const scrollHost = wrap.closest(".manuscriptTreeWrap--tech") || wrap;
-  scrollHost.addEventListener("scroll", () => redrawLines(), { passive: true });
-  window.addEventListener("resize", redrawLines, { passive: true });
+  scrollHost.addEventListener("scroll", () => scheduleStaticRedraw(), { passive: true });
+  window.addEventListener("resize", scheduleStaticRedraw, { passive: true });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) cancelAnimationFrame(rafId);
+    else startFxLoop();
+  });
 
   return wrap;
 }
