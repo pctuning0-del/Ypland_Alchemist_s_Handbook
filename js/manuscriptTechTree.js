@@ -163,13 +163,21 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     return Math.round(v * dpr) / dpr;
   }
 
-  /** Чёткие горизонтали/вертикали в CSS-пикселях после масштаба canvas. */
-  function snapLineCoord(cssVal, dpr, strokeCss, axis /* 'h' | 'v' */) {
-    const dev = cssVal * dpr;
-    const sw = strokeCss * dpr;
-    const aligned =
-      sw % 2 === 1 ? (Math.round(dev - 0.5) + 0.5) / dpr : Math.round(dev) / dpr;
-    return aligned;
+  /**
+   * Прямоугольник узла в координатах содержимого techTreeViewport (учёт scrollLeft/scrollTop).
+   * Одна система координат с canvas размером scrollWidth × scrollHeight — без «уползания» при масштабе.
+   */
+  function nodeRectContentCoords(el) {
+    const er = el.getBoundingClientRect();
+    const vr = viewport.getBoundingClientRect();
+    const sl = viewport.scrollLeft;
+    const st = viewport.scrollTop;
+    return {
+      x1: er.left - vr.left + sl,
+      y1: er.top - vr.top + st,
+      x2: er.right - vr.left + sl,
+      y2: er.bottom - vr.top + st,
+    };
   }
 
   function elbowGeometry(a, b) {
@@ -276,15 +284,18 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
   function redrawLines() {
     const dpr = pickDpr();
     const snap = (v) => snapCss(v, dpr);
-    const vpRect = viewport.getBoundingClientRect();
-    const cssW = Math.max(1, vpRect.width);
-    const cssH = Math.max(1, vpRect.height);
+    const cssW = Math.max(1, viewport.scrollWidth);
+    const cssH = Math.max(1, viewport.scrollHeight);
     const bw = Math.max(1, Math.round(cssW * dpr));
     const bh = Math.max(1, Math.round(cssH * dpr));
     canvas.width = bw;
     canvas.height = bh;
+    canvas.style.left = "0";
+    canvas.style.top = "0";
     canvas.style.width = `${cssW}px`;
     canvas.style.height = `${cssH}px`;
+    canvas.style.right = "auto";
+    canvas.style.bottom = "auto";
 
     const g = canvas.getContext("2d", { alpha: true });
     if (!g) return;
@@ -299,7 +310,6 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
         ? Math.min(1.35, window.visualViewport.scale)
         : 1;
     const msZ = Math.max(0.5, Math.min(2.35, getManuscriptZoom()));
-    // zoom на #manuscriptZoomScaler уменьшает всё на экране — компенсируем толщину штриха.
     const zoomScreenBoost = msZ < 1 ? 1 / Math.pow(msZ, 0.78) : 1;
     const coreW = Math.min(
       5.6,
@@ -314,12 +324,12 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     nodeEls.forEach((el) => {
       const uid = el.getAttribute("data-tree-uid");
       if (!uid) return;
-      const r = el.getBoundingClientRect();
+      const r = nodeRectContentCoords(el);
       pos.set(uid, {
-        x1: snap(r.left - vpRect.left),
-        y1: snap(r.top - vpRect.top),
-        x2: snap(r.right - vpRect.left),
-        y2: snap(r.bottom - vpRect.top),
+        x1: snap(r.x1),
+        y1: snap(r.y1),
+        x2: snap(r.x2),
+        y2: snap(r.y2),
       });
     });
 
@@ -329,11 +339,11 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
       if (!a || !b) continue;
       let { sx, sy, midX, ty, tx } = elbowGeometry(a, b);
 
-      sx = snapLineCoord(sx, dpr, coreW, "v");
-      sy = snapLineCoord(sy, dpr, coreW, "h");
-      midX = snapLineCoord(midX, dpr, coreW, "v");
-      ty = snapLineCoord(ty, dpr, coreW, "h");
-      tx = snapLineCoord(tx, dpr, coreW, "v");
+      sx = snap(sx);
+      sy = snap(sy);
+      midX = snap(midX);
+      ty = snap(ty);
+      tx = snap(tx);
 
       strokeConnectorLayers(g, sx, sy, midX, ty, tx, coreW);
     }

@@ -1,4 +1,4 @@
-import { renderRecipeTechTree } from "./js/manuscriptTechTree.js?v=2026-05-11-16";
+import { renderRecipeTechTree } from "./js/manuscriptTechTree.js?v=2026-05-11-17";
 
 function escapeHtml(text) {
   const div = document.createElement("div");
@@ -118,13 +118,11 @@ async function init() {
   function applyManuscriptZoom(next) {
     manuscriptZoom = Math.min(MS_Z_MAX, Math.max(MS_Z_MIN, next));
     const z = manuscriptZoom;
+    /** Только transform:scale + компенсация ширины — один композитный слой, без CSS zoom (линии/canvas не «плывут» в Chromium). */
     manuscriptZoomScaler.style.zoom = "";
-    manuscriptZoomScaler.style.transform = "";
-    if (typeof CSS !== "undefined" && CSS.supports && CSS.supports("zoom", "1")) {
-      manuscriptZoomScaler.style.zoom = String(z);
-    } else {
-      manuscriptZoomScaler.style.transform = `scale(${z})`;
-    }
+    manuscriptZoomScaler.style.transformOrigin = "top left";
+    manuscriptZoomScaler.style.transform = `scale(${z})`;
+    manuscriptZoomScaler.style.width = `${100 / z}%`;
     manuscriptZoomLabel.textContent = `${Math.round(z * 100)}%`;
     requestAnimationFrame(() => {
       window.dispatchEvent(new Event("resize"));
@@ -170,6 +168,11 @@ async function init() {
   );
 
   applyManuscriptZoom(1);
+
+  const roMsScaler = new ResizeObserver(() => {
+    window.dispatchEvent(new Event("resize"));
+  });
+  roMsScaler.observe(manuscriptZoomScaler);
 
   let recipes = [];
 
