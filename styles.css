@@ -552,6 +552,7 @@ body {
   stroke: rgba(43, 28, 18, 0.26);
   stroke-width: 2.2;
   stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .techTreeGrid {

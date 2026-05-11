@@ -480,48 +480,53 @@ async function init() {
     // Рендер "как тех-дерево": колонки по глубине + линии связей (SVG)
     const maxDepth = 6;
 
-    // Собрать уровни и связи (по ингредиентам, которые являются рецептами)
+    // У каждого узла в дереве — свой uid (один и тот же рецепт может быть в нескольких местах).
+    // Иначе data-node-id дублируется, getBoundingClientRect берётся только для одной карточки — линии «ломаются».
     const levels = [];
     const edges = [];
-    const seenAtDepth = new Map(); // depth -> Set(id)
 
     function ensureDepth(d) {
       while (levels.length <= d) levels.push([]);
-      if (!seenAtDepth.has(d)) seenAtDepth.set(d, new Set());
     }
 
-    function pushNodeAtDepth(r, d) {
+    function pushNodeAtDepth(uid, r, d) {
       ensureDepth(d);
-      const set = seenAtDepth.get(d);
-      if (!r?.id || set.has(r.id)) return;
-      set.add(r.id);
-      levels[d].push(r);
+      levels[d].push({ uid, recipe: r });
     }
 
-    // BFS по глубине
     const queue = [];
-    const visitedGlobal = new Set();
+    let uidSeq = 0;
+    const nextUid = () => {
+      uidSeq += 1;
+      return `tn-${uidSeq}`;
+    };
+
     if (rootRecipe?.id) {
-      pushNodeAtDepth(rootRecipe, 0);
-      queue.push({ r: rootRecipe, d: 0 });
-      visitedGlobal.add(rootRecipe.id);
+      const rootUid = nextUid();
+      pushNodeAtDepth(rootUid, rootRecipe, 0);
+      queue.push({
+        r: rootRecipe,
+        d: 0,
+        uid: rootUid,
+        pathIds: new Set([rootRecipe.id]),
+      });
     }
 
     while (queue.length) {
-      const { r, d } = queue.shift();
+      const { r, d, uid, pathIds } = queue.shift();
       if (d >= maxDepth) continue;
       const groups = parseIngredientsToItems(r);
       for (const g of groups) {
         for (const it of g.items) {
           const linked = findRecipeForIngredient(recipes, it.name, r?.id);
           if (!linked) continue;
-          edges.push({ fromId: r.id, toId: linked.id });
-          pushNodeAtDepth(linked, d + 1);
-          // избегаем бесконечных циклов, но позволяем показывать один и тот же рецепт в разных глубинах
-          const key = `${linked.id}@${d + 1}`;
-          if (visitedGlobal.has(key)) continue;
-          visitedGlobal.add(key);
-          queue.push({ r: linked, d: d + 1 });
+          if (pathIds.has(linked.id)) continue;
+          const childUid = nextUid();
+          edges.push({ fromUid: uid, toUid: childUid });
+          pushNodeAtDepth(childUid, linked, d + 1);
+          const nextPath = new Set(pathIds);
+          nextPath.add(linked.id);
+          queue.push({ r: linked, d: d + 1, uid: childUid, pathIds: nextPath });
         }
       }
     }
@@ -541,10 +546,11 @@ async function init() {
     grid.className = "techTreeGrid";
 
     // Хелпер: карточка-узел
-    function nodeCard(r) {
+    function nodeCard(r, treeUid) {
       const card = document.createElement("div");
       card.className = "techNode";
-      card.dataset.nodeId = r.id;
+      card.dataset.treeUid = treeUid;
+      card.dataset.recipeId = r.id;
 
       const head = document.createElement("div");
       head.className = "techNode__head";
@@ -607,7 +613,9 @@ async function init() {
       const col = document.createElement("div");
       col.className = "techCol";
       col.dataset.depth = String(d);
-      for (const r of levels[d]) col.appendChild(nodeCard(r));
+      for (const { uid, recipe } of levels[d]) {
+        col.appendChild(nodeCard(recipe, uid));
+      }
       grid.appendChild(col);
       colEls.push(col);
     }
@@ -625,13 +633,13 @@ async function init() {
       svg.setAttribute("height", String(h));
       while (svg.firstChild) svg.removeChild(svg.firstChild);
 
-      const nodeEls = viewport.querySelectorAll(".techNode[data-node-id]");
+      const nodeEls = viewport.querySelectorAll(".techNode[data-tree-uid]");
       const pos = new Map();
       nodeEls.forEach((el) => {
-        const id = el.getAttribute("data-node-id");
-        if (!id) return;
+        const uid = el.getAttribute("data-tree-uid");
+        if (!uid) return;
         const r = el.getBoundingClientRect();
-        pos.set(id, {
+        pos.set(uid, {
           x1: r.left - vpRect.left,
           y1: r.top - vpRect.top,
           x2: r.right - vpRect.left,
@@ -639,25 +647,22 @@ async function init() {
         });
       });
 
-      function bezierPath(a, b) {
+      // Ломаная «как в игре»: вправо из центра правой грани родителя, затем вверх/вниз к центру левой грани ребёнка
+      function elbowPath(a, b) {
         const sx = a.x2;
         const sy = (a.y1 + a.y2) / 2;
         const tx = b.x1;
         const ty = (b.y1 + b.y2) / 2;
-        const dx = Math.max(40, (tx - sx) * 0.55);
-        const c1x = sx + dx;
-        const c1y = sy;
-        const c2x = tx - dx;
-        const c2y = ty;
-        return `M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${tx} ${ty}`;
+        const midX = sx + Math.max(18, (tx - sx) * 0.45);
+        return `M ${sx} ${sy} L ${midX} ${sy} L ${midX} ${ty} L ${tx} ${ty}`;
       }
 
       for (const e of edges) {
-        const a = pos.get(e.fromId);
-        const b = pos.get(e.toId);
+        const a = pos.get(e.fromUid);
+        const b = pos.get(e.toUid);
         if (!a || !b) continue;
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", bezierPath(a, b));
+        path.setAttribute("d", elbowPath(a, b));
         path.setAttribute("class", "techTreeLine");
         svg.appendChild(path);
       }
