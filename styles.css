@@ -524,6 +524,104 @@ body {
   padding-bottom: 4px;
 }
 
+.manuscriptTreeWrap--tech {
+  overflow: auto;
+  padding-bottom: 10px;
+}
+
+.techTreeWrap {
+  min-width: 100%;
+  position: relative;
+}
+
+.techTreeViewport {
+  position: relative;
+  min-height: 260px;
+  padding: 6px 2px;
+}
+
+.techTreeLines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.techTreeLine {
+  fill: none;
+  stroke: rgba(43, 28, 18, 0.26);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.techTreeGrid {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 320px);
+  gap: 26px;
+  align-items: start;
+}
+
+.techCol {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 6px 2px;
+}
+
+.techNode {
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(255,255,255,0.38);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+  cursor: pointer;
+  user-select: none;
+}
+
+.techNode:hover {
+  border-color: rgba(215,180,106,0.85);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.14);
+}
+
+.techNode__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+}
+
+.techNode__head .tokenLogo {
+  width: 22px;
+  height: 22px;
+}
+
+.techNode__title {
+  line-height: 1.15;
+}
+
+.techNode__list {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+  opacity: 0.95;
+}
+
+.techNode__line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.25;
+  font-size: 13px;
+}
+
+.techNode__more {
+  opacity: 0.7;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
 .treeNode {
   min-width: 240px;
   max-width: 320px;

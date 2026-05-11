@@ -476,6 +476,203 @@ async function init() {
     return nodeForRecipe(rootRecipe, 0, visited);
   }
 
+  function renderRecipeTechTree(rootRecipe) {
+    // Рендер "как тех-дерево": колонки по глубине + линии связей (SVG)
+    const maxDepth = 6;
+
+    // Собрать уровни и связи (по ингредиентам, которые являются рецептами)
+    const levels = [];
+    const edges = [];
+    const seenAtDepth = new Map(); // depth -> Set(id)
+
+    function ensureDepth(d) {
+      while (levels.length <= d) levels.push([]);
+      if (!seenAtDepth.has(d)) seenAtDepth.set(d, new Set());
+    }
+
+    function pushNodeAtDepth(r, d) {
+      ensureDepth(d);
+      const set = seenAtDepth.get(d);
+      if (!r?.id || set.has(r.id)) return;
+      set.add(r.id);
+      levels[d].push(r);
+    }
+
+    // BFS по глубине
+    const queue = [];
+    const visitedGlobal = new Set();
+    if (rootRecipe?.id) {
+      pushNodeAtDepth(rootRecipe, 0);
+      queue.push({ r: rootRecipe, d: 0 });
+      visitedGlobal.add(rootRecipe.id);
+    }
+
+    while (queue.length) {
+      const { r, d } = queue.shift();
+      if (d >= maxDepth) continue;
+      const groups = parseIngredientsToItems(r);
+      for (const g of groups) {
+        for (const it of g.items) {
+          const linked = findRecipeForIngredient(recipes, it.name, r?.id);
+          if (!linked) continue;
+          edges.push({ fromId: r.id, toId: linked.id });
+          pushNodeAtDepth(linked, d + 1);
+          // избегаем бесконечных циклов, но позволяем показывать один и тот же рецепт в разных глубинах
+          const key = `${linked.id}@${d + 1}`;
+          if (visitedGlobal.has(key)) continue;
+          visitedGlobal.add(key);
+          queue.push({ r: linked, d: d + 1 });
+        }
+      }
+    }
+
+    // DOM
+    const wrap = document.createElement("div");
+    wrap.className = "techTreeWrap";
+
+    const viewport = document.createElement("div");
+    viewport.className = "techTreeViewport";
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "techTreeLines");
+    svg.setAttribute("aria-hidden", "true");
+
+    const grid = document.createElement("div");
+    grid.className = "techTreeGrid";
+
+    // Хелпер: карточка-узел
+    function nodeCard(r) {
+      const card = document.createElement("div");
+      card.className = "techNode";
+      card.dataset.nodeId = r.id;
+
+      const head = document.createElement("div");
+      head.className = "techNode__head";
+
+      const logo =
+        r?.imageUrl && /^https?:\/\//u.test(String(r.imageUrl))
+          ? (() => {
+              const s = document.createElement("span");
+              s.className = "tokenLogo";
+              s.style.backgroundImage = `url("${String(r.imageUrl)}")`;
+              s.setAttribute("aria-hidden", "true");
+              return s;
+            })()
+          : null;
+      if (logo) head.appendChild(logo);
+
+      const title = document.createElement("div");
+      title.className = "techNode__title";
+      title.textContent = String(r?.name ?? "?");
+      head.appendChild(title);
+      card.appendChild(head);
+
+      // компактный состав: только строками, без групп
+      const list = document.createElement("div");
+      list.className = "techNode__list";
+      const groups = parseIngredientsToItems(r);
+      const maxLines = 6;
+      let lines = 0;
+      for (const g of groups) {
+        for (const it of g.items) {
+          if (lines >= maxLines) break;
+          const line = document.createElement("div");
+          line.className = "techNode__line";
+          const icon = makeLogoSpanForIngredient(it.name, r?.id);
+          if (icon) line.appendChild(icon);
+          const qty = String(it.qty ?? "").trim();
+          const nm = String(it.name ?? "").trim();
+          line.appendChild(document.createTextNode(qty ? `${qty} ${nm}` : nm));
+          list.appendChild(line);
+          lines += 1;
+        }
+        if (lines >= maxLines) break;
+      }
+      if (lines >= maxLines) {
+        const more = document.createElement("div");
+        more.className = "techNode__more";
+        more.textContent = "…";
+        list.appendChild(more);
+      }
+      card.appendChild(list);
+
+      // кликабельно открыть рецепт справа
+      card.addEventListener("click", () => showDetail(r));
+      return card;
+    }
+
+    // колонки
+    const colEls = [];
+    for (let d = 0; d < levels.length; d += 1) {
+      const col = document.createElement("div");
+      col.className = "techCol";
+      col.dataset.depth = String(d);
+      for (const r of levels[d]) col.appendChild(nodeCard(r));
+      grid.appendChild(col);
+      colEls.push(col);
+    }
+
+    viewport.appendChild(svg);
+    viewport.appendChild(grid);
+    wrap.appendChild(viewport);
+
+    function redrawLines() {
+      const vpRect = viewport.getBoundingClientRect();
+      const w = Math.max(1, Math.round(vpRect.width));
+      const h = Math.max(1, Math.round(vpRect.height));
+      svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      svg.setAttribute("width", String(w));
+      svg.setAttribute("height", String(h));
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+      const nodeEls = viewport.querySelectorAll(".techNode[data-node-id]");
+      const pos = new Map();
+      nodeEls.forEach((el) => {
+        const id = el.getAttribute("data-node-id");
+        if (!id) return;
+        const r = el.getBoundingClientRect();
+        pos.set(id, {
+          x1: r.left - vpRect.left,
+          y1: r.top - vpRect.top,
+          x2: r.right - vpRect.left,
+          y2: r.bottom - vpRect.top,
+        });
+      });
+
+      function bezierPath(a, b) {
+        const sx = a.x2;
+        const sy = (a.y1 + a.y2) / 2;
+        const tx = b.x1;
+        const ty = (b.y1 + b.y2) / 2;
+        const dx = Math.max(40, (tx - sx) * 0.55);
+        const c1x = sx + dx;
+        const c1y = sy;
+        const c2x = tx - dx;
+        const c2y = ty;
+        return `M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${tx} ${ty}`;
+      }
+
+      for (const e of edges) {
+        const a = pos.get(e.fromId);
+        const b = pos.get(e.toId);
+        if (!a || !b) continue;
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", bezierPath(a, b));
+        path.setAttribute("class", "techTreeLine");
+        svg.appendChild(path);
+      }
+    }
+
+    // Перерисовка после отрисовки DOM + при ресайзе
+    requestAnimationFrame(() => redrawLines());
+    const ro = new ResizeObserver(() => redrawLines());
+    ro.observe(viewport);
+    wrap.addEventListener("scroll", () => redrawLines(), { passive: true });
+    window.addEventListener("resize", redrawLines, { passive: true });
+
+    return wrap;
+  }
+
   function openManuscriptForSection(sectionName) {
     const sec = String(sectionName ?? "").trim();
     if (!sec) return;
@@ -519,8 +716,8 @@ async function init() {
         wrap.appendChild(head);
 
         const tree = document.createElement("div");
-        tree.className = "manuscriptTreeWrap";
-        tree.appendChild(renderRecipeTree(r));
+        tree.className = "manuscriptTreeWrap manuscriptTreeWrap--tech";
+        tree.appendChild(renderRecipeTechTree(r));
         wrap.appendChild(tree);
 
         manuscriptBody.appendChild(wrap);
