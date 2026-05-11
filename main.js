@@ -107,7 +107,10 @@ async function init() {
       manuscriptZoomContent.style.transform = `scale(${z})`;
     }
     manuscriptZoomLabel.textContent = `${Math.round(z * 100)}%`;
-    window.dispatchEvent(new Event("resize"));
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new Event("resize"));
+      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    });
   }
 
   btnMsZoomOut.addEventListener("click", () => {
@@ -129,6 +132,19 @@ async function init() {
       applyManuscriptZoom(manuscriptZoom + delta);
     },
     { passive: false }
+  );
+
+  let manuscriptViewportScrollRaf = 0;
+  manuscriptZoomViewport.addEventListener(
+    "scroll",
+    () => {
+      if (manuscriptViewportScrollRaf) return;
+      manuscriptViewportScrollRaf = requestAnimationFrame(() => {
+        manuscriptViewportScrollRaf = 0;
+        window.dispatchEvent(new Event("resize"));
+      });
+    },
+    { passive: true }
   );
 
   applyManuscriptZoom(1);
@@ -682,9 +698,12 @@ async function init() {
     wrap.appendChild(viewport);
 
     function redrawLines() {
+      const dpr = window.devicePixelRatio || 1;
+      const snap = (v) => Math.round(v * dpr) / dpr;
+
       const vpRect = viewport.getBoundingClientRect();
-      const w = Math.max(1, Math.round(vpRect.width));
-      const h = Math.max(1, Math.round(vpRect.height));
+      const w = Math.max(1, Math.round(snap(vpRect.width)));
+      const h = Math.max(1, Math.round(snap(vpRect.height)));
       svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
       svg.setAttribute("width", String(w));
       svg.setAttribute("height", String(h));
@@ -697,20 +716,20 @@ async function init() {
         if (!uid) return;
         const r = el.getBoundingClientRect();
         pos.set(uid, {
-          x1: r.left - vpRect.left,
-          y1: r.top - vpRect.top,
-          x2: r.right - vpRect.left,
-          y2: r.bottom - vpRect.top,
+          x1: snap(r.left - vpRect.left),
+          y1: snap(r.top - vpRect.top),
+          x2: snap(r.right - vpRect.left),
+          y2: snap(r.bottom - vpRect.top),
         });
       });
 
       // Ломаная «как в игре»: вправо из центра правой грани родителя, затем вверх/вниз к центру левой грани ребёнка
       function elbowPath(a, b) {
-        const sx = a.x2;
-        const sy = (a.y1 + a.y2) / 2;
-        const tx = b.x1;
-        const ty = (b.y1 + b.y2) / 2;
-        const midX = sx + Math.max(18, (tx - sx) * 0.45);
+        const sx = snap(a.x2);
+        const sy = snap((a.y1 + a.y2) / 2);
+        const tx = snap(b.x1);
+        const ty = snap((b.y1 + b.y2) / 2);
+        const midX = snap(sx + Math.max(18, (tx - sx) * 0.45));
         return `M ${sx} ${sy} L ${midX} ${sy} L ${midX} ${ty} L ${tx} ${ty}`;
       }
 
@@ -721,6 +740,8 @@ async function init() {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", elbowPath(a, b));
         path.setAttribute("class", "techTreeLine");
+        path.setAttribute("vector-effect", "non-scaling-stroke");
+        path.setAttribute("shape-rendering", "crispEdges");
         svg.appendChild(path);
       }
     }

@@ -650,10 +650,12 @@ body {
 
 .techTreeLine {
   fill: none;
-  stroke: rgba(43, 28, 18, 0.26);
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke: rgba(43, 28, 18, 0.52);
+  stroke-width: 3;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+  shape-rendering: crispEdges;
 }
 
 .techTreeGrid {
