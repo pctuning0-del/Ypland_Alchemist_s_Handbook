@@ -424,10 +424,16 @@ body {
 }
 
 .manuscriptSheet {
-  width: min(1200px, 100%);
-  height: min(92vh, 920px);
+  box-sizing: border-box;
+  width: min(1200px, calc(100vw - 36px));
+  height: min(92vh, calc(100vh - 36px));
+  max-width: calc(100vw - 36px);
+  max-height: calc(100vh - 36px);
+  min-width: 320px;
+  min-height: 260px;
   border-radius: 18px;
   overflow: hidden;
+  resize: both;
   color: var(--ink);
   background:
     radial-gradient(900px 600px at 30% 20%, rgba(255,255,255,0.70), rgba(255,255,255,0.00)),
@@ -479,6 +485,7 @@ body {
 }
 
 .manuscriptBody {
+  min-height: 0;
   padding: 14px 16px 18px;
   overflow: auto;
 }
