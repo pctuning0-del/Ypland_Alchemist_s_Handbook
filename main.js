@@ -90,6 +90,20 @@ async function init() {
   // На всякий случай: hidden у оверлея должен реально скрывать его (CSS тоже помогает).
   manuscriptOverlay.hidden = true;
 
+  // Масштаб вкладки (Ctrl+/−) меняет visualViewport — перерисуем линии тех-дерева без дублирующихся слушателей на каждое дерево.
+  if (window.visualViewport) {
+    let vvRaf = 0;
+    const bumpLayoutFromVisualViewport = () => {
+      if (vvRaf) return;
+      vvRaf = requestAnimationFrame(() => {
+        vvRaf = 0;
+        window.dispatchEvent(new Event("resize"));
+      });
+    };
+    window.visualViewport.addEventListener("resize", bumpLayoutFromVisualViewport, { passive: true });
+    window.visualViewport.addEventListener("scroll", bumpLayoutFromVisualViewport, { passive: true });
+  }
+
   /** Масштаб только содержимого манускрипта (не всей страницы). */
   let manuscriptZoom = 1;
   const MS_Z_MIN = 0.5;
@@ -109,7 +123,10 @@ async function init() {
     manuscriptZoomLabel.textContent = `${Math.round(z * 100)}%`;
     requestAnimationFrame(() => {
       window.dispatchEvent(new Event("resize"));
-      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("resize"));
+        requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+      });
     });
   }
 
@@ -709,6 +726,21 @@ async function init() {
       svg.setAttribute("height", String(h));
       while (svg.firstChild) svg.removeChild(svg.firstChild);
 
+      const lw = viewport.offsetWidth;
+      const cw = Math.max(1e-6, vpRect.width);
+      const lh = viewport.offsetHeight;
+      const ch = Math.max(1e-6, vpRect.height);
+      const layoutVsClient = Math.sqrt((lw / cw) * (lh / ch));
+      const pageScale =
+        window.visualViewport && window.visualViewport.scale > 0
+          ? window.visualViewport.scale
+          : 1;
+      const msZ = Math.max(0.45, Math.min(2.35, manuscriptZoom));
+      const strokeW = Math.min(
+        10,
+        Math.max(2.35, (3.4 * pageScale * Math.max(1, layoutVsClient)) / msZ)
+      );
+
       const nodeEls = viewport.querySelectorAll(".techNode[data-tree-uid]");
       const pos = new Map();
       nodeEls.forEach((el) => {
@@ -740,7 +772,7 @@ async function init() {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", elbowPath(a, b));
         path.setAttribute("class", "techTreeLine");
-        path.setAttribute("vector-effect", "non-scaling-stroke");
+        path.setAttribute("stroke-width", String(snap(strokeW)));
         path.setAttribute("shape-rendering", "crispEdges");
         svg.appendChild(path);
       }
