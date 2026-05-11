@@ -573,34 +573,36 @@ async function init() {
       head.appendChild(title);
       card.appendChild(head);
 
-      // компактный состав: только строками, без групп
-      const list = document.createElement("div");
-      list.className = "techNode__list";
-      const groups = parseIngredientsToItems(r);
-      const maxLines = 6;
-      let lines = 0;
-      for (const g of groups) {
+      // Состав как в карточке рецепта: блоки ВЫБЕРИ ОДИН / ВСЕ ОБЯЗАТЕЛЬНЫ (ingredientsBlocks)
+      const groupsData = parseIngredientsToItems(r);
+      const groupsRoot = document.createElement("div");
+      groupsRoot.className = "ingGroups techNode__ingGroups";
+      for (const g of groupsData) {
+        const group = document.createElement("div");
+        group.className = "ingGroup";
+        const gh = document.createElement("div");
+        gh.className = "ingGroup__head";
+        const badge = document.createElement("span");
+        badge.className = "ingGroup__badge";
+        badge.textContent = g.label;
+        gh.appendChild(badge);
+        group.appendChild(gh);
+        const ingList = document.createElement("div");
+        ingList.className = "ingList";
         for (const it of g.items) {
-          if (lines >= maxLines) break;
           const line = document.createElement("div");
-          line.className = "techNode__line";
+          line.className = "ingLine";
           const icon = makeLogoSpanForIngredient(it.name, r?.id);
           if (icon) line.appendChild(icon);
           const qty = String(it.qty ?? "").trim();
           const nm = String(it.name ?? "").trim();
           line.appendChild(document.createTextNode(qty ? `${qty} ${nm}` : nm));
-          list.appendChild(line);
-          lines += 1;
+          ingList.appendChild(line);
         }
-        if (lines >= maxLines) break;
+        group.appendChild(ingList);
+        groupsRoot.appendChild(group);
       }
-      if (lines >= maxLines) {
-        const more = document.createElement("div");
-        more.className = "techNode__more";
-        more.textContent = "…";
-        list.appendChild(more);
-      }
-      card.appendChild(list);
+      card.appendChild(groupsRoot);
 
       // кликабельно открыть рецепт справа
       card.addEventListener("click", () => showDetail(r));

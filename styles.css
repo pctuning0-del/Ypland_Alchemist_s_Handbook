@@ -559,7 +559,7 @@ body {
   position: relative;
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(260px, 320px);
+  grid-auto-columns: minmax(280px, 380px);
   gap: 26px;
   align-items: start;
 }
@@ -602,25 +602,24 @@ body {
   line-height: 1.15;
 }
 
-.techNode__list {
-  margin-top: 8px;
-  display: grid;
-  gap: 6px;
-  opacity: 0.95;
-}
-
-.techNode__line {
-  display: flex;
-  align-items: center;
+/* Состав в узле манускрипта — те же блоки, что у рецепта, чуть компактнее */
+.techNode__ingGroups {
   gap: 8px;
-  line-height: 1.25;
-  font-size: 13px;
+  margin-top: 2px;
 }
 
-.techNode__more {
-  opacity: 0.7;
-  font-weight: 900;
-  letter-spacing: 1px;
+.techNode__ingGroups .ingGroup {
+  padding: 8px 8px;
+}
+
+.techNode__ingGroups .ingGroup__badge {
+  font-size: 10px;
+  letter-spacing: 0.35px;
+}
+
+.techNode__ingGroups .ingLine {
+  font-size: 12px;
+  margin-bottom: 3px;
 }
 
 .treeNode {
