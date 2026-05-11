@@ -97,7 +97,7 @@ py -m http.server 8000
 | `index.html` | Разметка страницы |
 | `styles.css` | Оформление «книги» |
 | `main.js` | Загрузка `recipes.json`, список, детали, кликабельные ингредиенты, манускрипт (ES module) |
-| `js/manuscriptTechTree.js` | Тех-дерево в манускрипте (Canvas-связи между карточками) |
+| `js/manuscriptTechTree.js` | Тех-дерево в манускрипте (**PixiJS / WebGL**, связи между карточками; при необходимости подгрузка с CDN) |
 | `recipes.json` | Все рецепты (редактируй здесь или импортируй скриптом) |
 | `assets/` | Иконки для ингредиентов (NEAR/HOPE/BEES/MED/Golden DarAi/Magic Dust) |
 | `tools/yupland_import_manifest.json` | Манифест URL вики для импорта |
@@ -107,7 +107,7 @@ py -m http.server 8000
 | `bot.py` | Telegram-бот |
 | `run_bot.ps1` | Запуск бота с уже прописанным `SITE_URL` (GitHub Pages) |
 | `run_bot.bat` | То же, если PowerShell блокирует `.ps1` (политика выполнения) |
-| `index.js`, `package.json` | Минимальный бот на **Node.js** (grammY), токен `BOT_TOKEN` в `.env`, скрипт `import:yupland` |
+| `index.js`, `package.json` | Минимальный бот на **Node.js** (grammY), токен `BOT_TOKEN` в `.env`, скрипт `import:yupland`; для локальной разработки сайта также ставится **pixi.js** (связи манускрипта) |
 | `start_node_bot.cmd` | Запуск `npm start`, если в терминале не видно `npm` (PATH) |
 | `requirements.txt` | Зависимости Python для бота |
 | `.gitignore` | Исключает служебное (`__pycache__`, `.env` и т.п.) |

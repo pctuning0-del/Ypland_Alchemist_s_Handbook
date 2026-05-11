@@ -1,6 +1,19 @@
 /**
- * Тех-дерево манускрипта: DOM-сетка + Canvas-связи с усиленными визуальными эффектами (анимация, свечение, «поток»).
+ * Тех-дерево манускрипта: колонки по глубине + связи через PixiJS/WebGL (Graphics).
+ * Карточки остаются в DOM; линии — отдельный слой, те же координаты, что и раньше.
  */
+
+/** Pixi: сначала локальный npm (dev), при отсутствии — CDN (GitHub Pages без node_modules). */
+let pixiModulePromise = null;
+function loadPixi() {
+  if (!pixiModulePromise) {
+    pixiModulePromise = import("../node_modules/pixi.js/lib/index.mjs").catch(() =>
+      import("https://cdn.jsdelivr.net/npm/pixi.js@8.18.1/dist/pixi.min.mjs")
+    );
+  }
+  return pixiModulePromise;
+}
+
 export function renderRecipeTechTree(rootRecipe, ctx) {
   const {
     recipes,
@@ -10,10 +23,6 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     makeLogoSpanForIngredient,
     showDetail,
   } = ctx;
-
-  const prefersReducedMotion =
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const maxDepth = 6;
   const levels = [];
@@ -71,12 +80,18 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
   const viewport = document.createElement("div");
   viewport.className = "techTreeViewport";
 
-  const canvas = document.createElement("canvas");
-  canvas.className = "techTreeConnectors techTreeConnectors--fx";
-  canvas.setAttribute("aria-hidden", "true");
+  const pixiWrap = document.createElement("div");
+  pixiWrap.className = "techTreePixiWrap";
+  pixiWrap.setAttribute("aria-hidden", "true");
 
   const grid = document.createElement("div");
   grid.className = "techTreeGrid";
+
+  /** @type {import('pixi.js').Application | null} */
+  let pixiApp = null;
+  /** @type {import('pixi.js').Graphics | null} */
+  let lineGraphics = null;
+  let pixiInitPromise = null;
 
   function nodeCard(r, treeUid) {
     const card = document.createElement("div");
@@ -149,7 +164,7 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     grid.appendChild(col);
   }
 
-  viewport.appendChild(canvas);
+  viewport.appendChild(pixiWrap);
   viewport.appendChild(grid);
   wrap.appendChild(viewport);
 
@@ -193,137 +208,152 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     return { sx, sy, midX, ty, tx };
   }
 
-  /** Path2D ортогонального пути со скруглениями — один раз строим, много раз штрихуем. */
-  function buildElbowPath2D(sx, sy, midX, ty, tx, radiusCss) {
+  /**
+   * @param {import('pixi.js').Graphics} gfx
+   */
+  function appendRoundedElbowPath(gfx, sx, sy, midX, ty, tx, radiusCss) {
     const down = ty >= sy;
     const right = tx >= midX;
     const dx1 = Math.abs(midX - sx);
     const dy = Math.abs(ty - sy);
     const dx2 = Math.abs(tx - midX);
 
-    const p = new Path2D();
-    p.moveTo(sx, sy);
+    gfx.moveTo(sx, sy);
 
     if (dx1 < 2 || dy < 2 || dx2 < 2) {
-      p.lineTo(midX, sy);
-      p.lineTo(midX, ty);
-      p.lineTo(tx, ty);
-      return p;
+      gfx.lineTo(midX, sy).lineTo(midX, ty).lineTo(tx, ty);
+      return;
     }
 
     let r = Math.min(radiusCss, dx1 * 0.42, dy * 0.42, dx2 * 0.42);
     r = Math.max(2.5, Math.min(r, dx1 * 0.48, dy * 0.48, dx2 * 0.48));
 
-    p.lineTo(midX - r, sy);
-    if (down) p.quadraticCurveTo(midX, sy, midX, sy + r);
-    else p.quadraticCurveTo(midX, sy, midX, sy - r);
+    gfx.lineTo(midX - r, sy);
+    if (down) gfx.quadraticCurveTo(midX, sy, midX, sy + r);
+    else gfx.quadraticCurveTo(midX, sy, midX, sy - r);
 
-    if (down) p.lineTo(midX, ty - r);
-    else p.lineTo(midX, ty + r);
+    if (down) gfx.lineTo(midX, ty - r);
+    else gfx.lineTo(midX, ty + r);
 
     if (right) {
-      p.quadraticCurveTo(midX, ty, midX + r, ty);
-      p.lineTo(tx, ty);
+      gfx.quadraticCurveTo(midX, ty, midX + r, ty);
+      gfx.lineTo(tx, ty);
     } else {
-      p.quadraticCurveTo(midX, ty, midX - r, ty);
-      p.lineTo(tx, ty);
-    }
-    return p;
-  }
-
-  function drawConnectorFx(g, path, coreW, timeMs, edgeIdx, sx, sy, tx, ty, midX) {
-    const pulse = 0.85 + 0.15 * Math.sin(timeMs * 0.0018 + edgeIdx * 1.1);
-    const flow = prefersReducedMotion ? 0 : timeMs * 0.045;
-
-    g.lineJoin = "round";
-    g.lineCap = "round";
-
-    g.shadowColor = "rgba(215, 180, 106, 0.55)";
-    g.shadowBlur = 12 * pulse;
-    g.shadowOffsetX = 0;
-    g.shadowOffsetY = 0;
-    g.strokeStyle = `rgba(215, 180, 106, ${0.18 * pulse})`;
-    g.lineWidth = coreW * 5.2;
-    g.stroke(path);
-    g.shadowBlur = 0;
-
-    g.strokeStyle = `rgba(255, 220, 150, ${0.24 * pulse})`;
-    g.lineWidth = coreW * 2.8;
-    g.stroke(path);
-
-    const ox = Math.sin(timeMs * 0.0005 + edgeIdx) * 14;
-    const oy = Math.cos(timeMs * 0.00048 + edgeIdx * 0.7) * 14;
-    const grad = g.createLinearGradient(sx + ox, sy + oy, tx - ox, ty - oy);
-    grad.addColorStop(0, `rgba(72, 48, 30, ${0.92 + 0.06 * pulse})`);
-    grad.addColorStop(0.5, "rgba(38, 24, 15, 0.98)");
-    grad.addColorStop(1, "rgba(18, 11, 8, 1)");
-
-    g.strokeStyle = grad;
-    g.lineWidth = coreW * 1.05;
-    g.stroke(path);
-
-    g.strokeStyle = "rgba(255, 252, 245, 0.5)";
-    g.lineWidth = Math.max(0.75, coreW * 0.36);
-    g.stroke(path);
-
-    if (!prefersReducedMotion) {
-      g.save();
-      g.setLineDash([7, 10]);
-      g.lineDashOffset = -flow;
-      g.strokeStyle = `rgba(255, 214, 120, ${0.55 + 0.2 * Math.sin(timeMs * 0.003 + edgeIdx)})`;
-      g.lineWidth = Math.max(1.2, coreW * 0.55);
-      g.stroke(path);
-      g.setLineDash([]);
-      g.restore();
-    }
-
-    const dotR = Math.max(2.6, coreW * 0.9) * (0.92 + 0.08 * pulse);
-    const ring = dotR * 1.65;
-    const midY = (sy + ty) / 2;
-
-    g.fillStyle = `rgba(43, 28, 18, ${0.88 + 0.1 * pulse})`;
-    g.beginPath();
-    g.arc(sx, sy, dotR, 0, Math.PI * 2);
-    g.fill();
-    g.strokeStyle = `rgba(255, 214, 130, ${0.35 + 0.2 * pulse})`;
-    g.lineWidth = 1.2;
-    g.beginPath();
-    g.arc(sx, sy, ring, 0, Math.PI * 2);
-    g.stroke();
-
-    g.fillStyle = `rgba(43, 28, 18, ${0.9 + 0.08 * pulse})`;
-    g.beginPath();
-    g.arc(tx, ty, dotR * 0.95, 0, Math.PI * 2);
-    g.fill();
-    g.strokeStyle = `rgba(255, 214, 130, ${0.3 + 0.18 * pulse})`;
-    g.beginPath();
-    g.arc(tx, ty, ring * 0.95, 0, Math.PI * 2);
-    g.stroke();
-
-    g.fillStyle = "rgba(255, 248, 235, 0.55)";
-    g.beginPath();
-    g.arc(sx - dotR * 0.2, sy - dotR * 0.2, dotR * 0.32, 0, Math.PI * 2);
-    g.fill();
-
-    if (!prefersReducedMotion) {
-      const tw = 0.5 + 0.5 * Math.sin(timeMs * 0.004 + edgeIdx * 2.1);
-      const rg = g.createRadialGradient(midX, midY, 0, midX, midY, 16);
-      rg.addColorStop(0, `rgba(255, 230, 160, ${0.32 * tw})`);
-      rg.addColorStop(1, "rgba(255, 230, 160, 0)");
-      g.fillStyle = rg;
-      g.beginPath();
-      g.arc(midX, midY, 16, 0, Math.PI * 2);
-      g.fill();
+      gfx.quadraticCurveTo(midX, ty, midX - r, ty);
+      gfx.lineTo(tx, ty);
     }
   }
 
-  let lastGeo = { cssW: 0, cssH: 0, dpr: 1, snap: (x) => x, coreW: 3.5, pos: new Map() };
+  /**
+   * @param {import('pixi.js').Graphics} gfx
+   * @param {import('pixi.js').FillGradient | null} grad
+   */
+  function strokeEdgeLayers(gfx, sx, sy, midX, ty, tx, coreW, grad) {
+    const rStroke = Math.min(10, Math.max(4, coreW * 2.2));
 
-  function measureGeometry() {
+    appendRoundedElbowPath(gfx, sx, sy, midX, ty, tx, rStroke);
+    gfx.stroke({
+      width: coreW * 4.2,
+      color: 0xd7b46a,
+      alpha: 0.22,
+      cap: "round",
+      join: "round",
+    });
+
+    appendRoundedElbowPath(gfx, sx, sy, midX, ty, tx, rStroke);
+    gfx.stroke({
+      width: coreW * 2.1,
+      color: 0xd7b46a,
+      alpha: 0.38,
+      cap: "round",
+      join: "round",
+    });
+
+    appendRoundedElbowPath(gfx, sx, sy, midX, ty, tx, rStroke);
+    if (grad) {
+      gfx.stroke({
+        width: coreW,
+        fill: grad,
+        cap: "round",
+        join: "round",
+      });
+    } else {
+      gfx.stroke({
+        width: coreW,
+        color: 0x2b1c12,
+        alpha: 0.98,
+        cap: "round",
+        join: "round",
+      });
+    }
+
+    appendRoundedElbowPath(gfx, sx, sy, midX, ty, tx, rStroke);
+    gfx.stroke({
+      width: Math.max(0.9, coreW * 0.4),
+      color: 0xfff8eb,
+      alpha: 0.42,
+      cap: "round",
+      join: "round",
+    });
+
+    const dotR = Math.max(2.4, coreW * 0.85);
+    gfx.circle(sx, sy, dotR).fill({ color: 0x2b1c12, alpha: 0.95 });
+    gfx.circle(tx, ty, dotR * 0.92).fill({ color: 0x2b1c12, alpha: 0.95 });
+    gfx.circle(sx - dotR * 0.25, sy - dotR * 0.25, dotR * 0.35).fill({ color: 0xfff8eb, alpha: 0.5 });
+  }
+
+  async function ensurePixi(cssW, cssH, dpr) {
+    if (pixiApp && lineGraphics) {
+      pixiApp.renderer.resize(cssW, cssH, dpr);
+      return;
+    }
+    if (!pixiInitPromise) {
+      pixiInitPromise = (async () => {
+        const { Application, Graphics } = await loadPixi();
+        const app = new Application();
+        await app.init({
+          width: cssW,
+          height: cssH,
+          resolution: dpr,
+          autoDensity: true,
+          backgroundAlpha: 0,
+          antialias: true,
+          preference: "webgl",
+          autoStart: false,
+          powerPreference: "high-performance",
+        });
+        const g = new Graphics();
+        g.roundPixels = true;
+        app.stage.addChild(g);
+
+        const view = app.canvas;
+        view.classList.add("techTreeConnectors");
+        pixiWrap.appendChild(view);
+
+        pixiApp = app;
+        lineGraphics = g;
+      })();
+    }
+    await pixiInitPromise;
+    if (pixiApp) pixiApp.renderer.resize(cssW, cssH, dpr);
+  }
+
+  async function redrawLines() {
     const dpr = pickDpr();
     const snap = (v) => snapCss(v, dpr);
     const cssW = Math.max(1, viewport.scrollWidth);
     const cssH = Math.max(1, viewport.scrollHeight);
+
+    try {
+      await ensurePixi(cssW, cssH, dpr);
+    } catch (e) {
+      console.warn("PixiJS init failed, tech-tree lines hidden:", e);
+      return;
+    }
+
+    if (!lineGraphics || !pixiApp) return;
+
+    lineGraphics.clear();
 
     const pageScale =
       window.visualViewport && window.visualViewport.scale > 0
@@ -335,6 +365,8 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
       5.6,
       Math.max(3.05, (3.35 * pageScale * zoomScreenBoost) / Math.pow(msZ, 0.18))
     );
+
+    const { FillGradient } = await loadPixi();
 
     const nodeEls = viewport.querySelectorAll(".techNode[data-tree-uid]");
     const pos = new Map();
@@ -350,102 +382,47 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
       });
     });
 
-    lastGeo = { cssW, cssH, dpr, snap, coreW, pos };
-  }
-
-  function sizeCanvas() {
-    const { cssW, cssH, dpr } = lastGeo;
-    const bw = Math.max(1, Math.round(cssW * dpr));
-    const bh = Math.max(1, Math.round(cssH * dpr));
-    canvas.width = bw;
-    canvas.height = bh;
-    canvas.style.left = "0";
-    canvas.style.top = "0";
-    canvas.style.width = `${cssW}px`;
-    canvas.style.height = `${cssH}px`;
-    canvas.style.right = "auto";
-    canvas.style.bottom = "auto";
-  }
-
-  function paintFrame(timeMs) {
-    measureGeometry();
-    sizeCanvas();
-
-    const g = canvas.getContext("2d", { alpha: true });
-    if (!g) return;
-
-    const { cssW, cssH, dpr, coreW, pos } = lastGeo;
-
-    g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    g.clearRect(0, 0, cssW, cssH);
-    g.imageSmoothingEnabled = true;
-    g.imageSmoothingQuality = "high";
-
-    let ei = 0;
     for (const e of edges) {
       const a = pos.get(e.fromUid);
       const b = pos.get(e.toUid);
       if (!a || !b) continue;
       let { sx, sy, midX, ty, tx } = elbowGeometry(a, b);
-      sx = lastGeo.snap(sx);
-      sy = lastGeo.snap(sy);
-      midX = lastGeo.snap(midX);
-      ty = lastGeo.snap(ty);
-      tx = lastGeo.snap(tx);
 
-      const r = Math.min(10, Math.max(4, coreW * 2.2));
-      const path = buildElbowPath2D(sx, sy, midX, ty, tx, r);
-      drawConnectorFx(g, path, coreW, timeMs, ei, sx, sy, tx, ty, midX);
-      ei += 1;
+      sx = snap(sx);
+      sy = snap(sy);
+      midX = snap(midX);
+      ty = snap(ty);
+      tx = snap(tx);
+
+      lineGraphics.beginPath();
+
+      const grad = new FillGradient({
+        type: "linear",
+        start: { x: sx, y: sy },
+        end: { x: tx, y: ty },
+        textureSpace: "local",
+        colorStops: [
+          { offset: 0, color: "#342216" },
+          { offset: 0.45, color: "#261910" },
+          { offset: 1, color: "#160e0a" },
+        ],
+      });
+
+      strokeEdgeLayers(lineGraphics, sx, sy, midX, ty, tx, coreW, grad);
     }
-  }
 
-  let rafId = 0;
-  const t0 = performance.now();
-
-  function scheduleStaticRedraw() {
-    measureGeometry();
-    sizeCanvas();
-    paintFrame(prefersReducedMotion ? 0 : performance.now() - t0);
-  }
-
-  function tick(now) {
-    paintFrame(now - t0);
-    if (!prefersReducedMotion && !document.hidden) {
-      rafId = requestAnimationFrame(tick);
-    }
-  }
-
-  function startFxLoop() {
-    cancelAnimationFrame(rafId);
-    if (prefersReducedMotion || document.hidden) {
-      scheduleStaticRedraw();
-      return;
-    }
-    rafId = requestAnimationFrame(tick);
+    pixiApp.render();
   }
 
   requestAnimationFrame(() => {
-    scheduleStaticRedraw();
-    requestAnimationFrame(() => {
-      scheduleStaticRedraw();
-      startFxLoop();
-    });
+    void redrawLines();
+    requestAnimationFrame(() => void redrawLines());
   });
-
-  const ro = new ResizeObserver(() => {
-    scheduleStaticRedraw();
-    if (!prefersReducedMotion) startFxLoop();
-  });
+  const ro = new ResizeObserver(() => void redrawLines());
   ro.observe(viewport);
-
   const scrollHost = wrap.closest(".manuscriptTreeWrap--tech") || wrap;
-  scrollHost.addEventListener("scroll", () => scheduleStaticRedraw(), { passive: true });
-  window.addEventListener("resize", scheduleStaticRedraw, { passive: true });
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) cancelAnimationFrame(rafId);
-    else startFxLoop();
-  });
+  scrollHost.addEventListener("scroll", () => void redrawLines(), { passive: true });
+  window.addEventListener("resize", () => void redrawLines(), { passive: true });
 
   return wrap;
 }
