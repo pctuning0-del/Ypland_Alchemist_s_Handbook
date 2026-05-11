@@ -731,11 +731,10 @@ async function init() {
           ? Math.min(1.35, window.visualViewport.scale)
           : 1;
       const msZ = Math.max(0.5, Math.min(2.35, manuscriptZoom));
-      // Без отношения offsetWidth/clientRect — при CSS zoom оно раздувает штрих до «серых плит».
-      // Лёгкая компенсация: чуть толще при сильном уменьшении манускрипта, жёсткий потолок ~3.2.
+      // Без offsetWidth/clientRect — иначе «плиты» при zoom. Чуть толще на малых ms, потолок 3.6.
       const strokeW = Math.min(
-        3.2,
-        Math.max(1.85, (2.35 * pageScale) / Math.pow(msZ, 0.42))
+        3.6,
+        Math.max(2.05, (2.65 * pageScale) / Math.pow(msZ, 0.38))
       );
 
       const nodeEls = viewport.querySelectorAll(".techNode[data-tree-uid]");
@@ -752,13 +751,19 @@ async function init() {
         });
       });
 
-      // Ломаная «как в игре»: вправо из центра правой грани родителя, затем вверх/вниз к центру левой грани ребёнка
+      // Ломаная: из центра правого края родителя — сначала в «коридор» между колонками (не вплотную к карте).
       function elbowPath(a, b) {
         const sx = snap(a.x2);
         const sy = snap((a.y1 + a.y2) / 2);
         const tx = snap(b.x1);
         const ty = snap((b.y1 + b.y2) / 2);
-        const midX = snap(sx + Math.max(18, (tx - sx) * 0.45));
+        const span = Math.max(0, tx - sx);
+        const minStub = 26;
+        // Рельс ближе к середине промежутка между колонками, чтобы вертикаль не висела «внутри» широкой карточки.
+        let midX = snap(sx + Math.max(minStub, span * 0.56));
+        const railMax = snap(tx - Math.max(14, Math.min(32, span * 0.12)));
+        const railMin = snap(sx + Math.max(minStub, Math.min(40, span * 0.22)));
+        if (span > 1) midX = Math.min(Math.max(midX, railMin), Math.max(railMin, railMax));
         return `M ${sx} ${sy} L ${midX} ${sy} L ${midX} ${ty} L ${tx} ${ty}`;
       }
 
@@ -778,7 +783,8 @@ async function init() {
     requestAnimationFrame(() => redrawLines());
     const ro = new ResizeObserver(() => redrawLines());
     ro.observe(viewport);
-    wrap.addEventListener("scroll", () => redrawLines(), { passive: true });
+    const scrollHost = wrap.closest(".manuscriptTreeWrap--tech") || wrap;
+    scrollHost.addEventListener("scroll", () => redrawLines(), { passive: true });
     window.addEventListener("resize", redrawLines, { passive: true });
 
     return wrap;

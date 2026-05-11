@@ -651,7 +651,7 @@ body {
 
 .techTreeLine {
   fill: none;
-  stroke: rgba(43, 28, 18, 0.72);
+  stroke: rgba(43, 28, 18, 0.78);
   stroke-linecap: round;
   stroke-linejoin: round;
 }
