@@ -408,6 +408,14 @@ body {
   background-image: url("assets/magic_dust.png");
 }
 
+/* Спрятанные defs фильтра (разметка в index.html рядом с оверлеем) */
+.manuscriptFxDef {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 .manuscriptOverlay {
   position: fixed;
   inset: 0;
@@ -415,12 +423,21 @@ body {
   display: grid;
   place-items: center;
   padding: 18px;
-  background: rgba(5, 7, 14, 0.72);
-  backdrop-filter: blur(6px);
+  perspective: 1280px;
+  opacity: 0;
+  background:
+    radial-gradient(120% 90% at 50% 45%, rgba(215, 180, 106, 0.09), rgba(0, 0, 0, 0)),
+    rgba(5, 7, 14, 0.78);
+  backdrop-filter: blur(10px) saturate(1.15);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
 }
 
 .manuscriptOverlay[hidden] {
   display: none !important;
+}
+
+.manuscriptOverlay--open {
+  animation: manuscriptBackdropIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .manuscriptSheet {
@@ -432,18 +449,51 @@ body {
   max-height: calc(100vh - 36px);
   min-width: 320px;
   min-height: 260px;
-  border-radius: 18px;
+  border-radius: 20px;
   overflow: hidden;
   resize: both;
   color: var(--ink);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
   background:
-    radial-gradient(900px 600px at 30% 20%, rgba(255,255,255,0.70), rgba(255,255,255,0.00)),
-    repeating-linear-gradient(0deg, rgba(43,28,18,0.00), rgba(43,28,18,0.00) 10px, rgba(43,28,18,0.012) 10px, rgba(43,28,18,0.012) 11px),
+    linear-gradient(125deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 42%),
+    radial-gradient(900px 520px at 22% 12%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 58%),
+    radial-gradient(700px 480px at 88% 88%, rgba(215, 180, 106, 0.14), rgba(255, 255, 255, 0) 55%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(43, 28, 18, 0),
+      rgba(43, 28, 18, 0) 9px,
+      rgba(43, 28, 18, 0.018) 9px,
+      rgba(43, 28, 18, 0.018) 10px
+    ),
     var(--paper);
-  border: 1px solid rgba(215,180,106,0.55);
-  box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+  border: 1px solid rgba(215, 180, 106, 0.62);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.22) inset,
+    0 0 48px rgba(215, 180, 106, 0.12),
+    0 28px 80px rgba(0, 0, 0, 0.55),
+    0 4px 14px rgba(0, 0, 0, 0.22);
   display: grid;
   grid-template-rows: auto 1fr;
+}
+
+.manuscriptSheet--enter {
+  animation: manuscriptSheetIn 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Верхняя «кайма» пергамента + лёгкий блик */
+.manuscriptSheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(215, 180, 106, 0), rgba(215, 180, 106, 0.38) 50%, rgba(215, 180, 106, 0)) top / 100% 3px no-repeat,
+    linear-gradient(105deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 38%);
+  opacity: 0.62;
+  mix-blend-mode: soft-light;
 }
 
 /* Подсказка зоны resize (угол совпадает с ручкой браузера) */
@@ -454,53 +504,83 @@ body {
   bottom: 3px;
   width: 18px;
   height: 18px;
-  border-right: 2px solid rgba(43, 28, 18, 0.28);
-  border-bottom: 2px solid rgba(43, 28, 18, 0.28);
+  border-right: 2px solid rgba(43, 28, 18, 0.32);
+  border-bottom: 2px solid rgba(43, 28, 18, 0.32);
   border-radius: 0 0 10px 0;
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.85;
+  z-index: 2;
+  transition: opacity 0.35s ease, border-color 0.35s ease;
+}
+
+.manuscriptSheet:hover::after {
+  opacity: 1;
+  border-color: rgba(215, 180, 106, 0.55);
 }
 
 .manuscriptTop {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px dashed rgba(0,0,0,0.14);
+  padding: 16px 18px;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12));
+  box-shadow: 0 10px 28px rgba(43, 28, 18, 0.06);
 }
 
 .manuscriptTitle__kicker {
   font-size: 12px;
-  letter-spacing: 0.6px;
-  opacity: 0.7;
+  letter-spacing: 0.75px;
+  opacity: 0.72;
   text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .manuscriptTitle__main {
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: 0.2px;
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: 0.25px;
+  line-height: 1.2;
+  filter: url("#msTitleGlow");
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 24px rgba(215, 180, 106, 0.35);
 }
 
 .manuscriptClose {
-  width: 40px;
-  height: 40px;
+  position: relative;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
-  border: 1px solid rgba(43, 28, 18, 0.22);
-  background: rgba(215, 180, 106, 0.20);
+  border: 1px solid rgba(43, 28, 18, 0.24);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.55), rgba(215, 180, 106, 0.28));
   color: var(--ink);
   font: inherit;
   font-weight: 900;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(43, 28, 18, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .manuscriptClose:hover {
-  border-color: rgba(215, 180, 106, 0.85);
-  background: rgba(215, 180, 106, 0.35);
+  border-color: rgba(215, 180, 106, 0.9);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.7), rgba(215, 180, 106, 0.42));
+  box-shadow: 0 6px 18px rgba(215, 180, 106, 0.25);
+  transform: translateY(-1px);
+}
+
+.manuscriptClose:active {
+  transform: translateY(0);
 }
 
 .manuscriptBody {
+  position: relative;
+  z-index: 2;
   min-height: 0;
   padding: 0;
   display: flex;
@@ -514,9 +594,10 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 10px;
-  padding: 8px 14px 10px;
+  padding: 10px 16px 11px;
   border-bottom: 1px dashed rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.35);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.22));
+  box-shadow: 0 6px 18px rgba(43, 28, 18, 0.05);
 }
 
 .manuscriptZoomBar__label {
@@ -545,18 +626,26 @@ body {
   padding: 0 10px;
   border-radius: 10px;
   border: 1px solid rgba(43, 28, 18, 0.22);
-  background: rgba(215, 180, 106, 0.22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(215, 180, 106, 0.22));
   color: var(--ink);
   font: inherit;
   font-weight: 900;
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(43, 28, 18, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
 .manuscriptZoomBtn:hover {
-  border-color: rgba(215, 180, 106, 0.85);
-  background: rgba(215, 180, 106, 0.35);
+  border-color: rgba(215, 180, 106, 0.9);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(215, 180, 106, 0.38));
+  box-shadow: 0 4px 12px rgba(215, 180, 106, 0.22);
+  transform: translateY(-1px);
+}
+
+.manuscriptZoomBtn:active {
+  transform: translateY(0);
 }
 
 .manuscriptZoomBtn--text {
@@ -577,6 +666,23 @@ body {
   min-height: 0;
   overflow: auto;
   padding: 14px 16px 18px;
+  scrollbar-color: rgba(215, 180, 106, 0.55) rgba(43, 28, 18, 0.06);
+}
+
+.manuscriptZoomViewport::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.manuscriptZoomViewport::-webkit-scrollbar-track {
+  background: rgba(43, 28, 18, 0.05);
+  border-radius: 8px;
+}
+
+.manuscriptZoomViewport::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(215, 180, 106, 0.65), rgba(215, 180, 106, 0.35));
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
 }
 
 .manuscriptZoomContent {
@@ -584,13 +690,61 @@ body {
   /* Масштаб задаётся из JS: zoom (Chromium) или transform (fallback) */
 }
 
+.manuscriptOverlay--open .manuscriptZoomContent > * {
+  animation: manuscriptBlockIn 0.52s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.manuscriptOverlay--open .manuscriptZoomContent > *:nth-child(1) {
+  animation-delay: 0.06s;
+}
+
+.manuscriptOverlay--open .manuscriptZoomContent > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.manuscriptOverlay--open .manuscriptZoomContent > *:nth-child(3) {
+  animation-delay: 0.14s;
+}
+
+.manuscriptOverlay--open .manuscriptZoomContent > *:nth-child(4) {
+  animation-delay: 0.18s;
+}
+
+.manuscriptOverlay--open .manuscriptZoomContent > *:nth-child(5) {
+  animation-delay: 0.22s;
+}
+
+.manuscriptOverlay--open .manuscriptZoomContent > *:nth-child(6) {
+  animation-delay: 0.26s;
+}
+
+.manuscriptOverlay--open .manuscriptZoomContent > *:nth-child(7) {
+  animation-delay: 0.3s;
+}
+
+.manuscriptOverlay--open .manuscriptZoomContent > *:nth-child(8) {
+  animation-delay: 0.34s;
+}
+
+.manuscriptOverlay--open .manuscriptZoomContent > *:nth-child(n + 9) {
+  animation-delay: 0.38s;
+}
+
 .manuscriptRecipe {
   margin: 0 0 16px;
-  padding: 12px 12px;
+  padding: 14px 14px;
   border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.08);
-  background: rgba(0,0,0,0.02);
+  border: 1px solid rgba(43, 28, 18, 0.1);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.12));
   overflow: hidden;
+  box-shadow: 0 8px 22px rgba(43, 28, 18, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.manuscriptRecipe:hover {
+  border-color: rgba(215, 180, 106, 0.45);
+  box-shadow: 0 12px 32px rgba(43, 28, 18, 0.12), 0 0 0 1px rgba(215, 180, 106, 0.18);
+  transform: translateY(-2px);
 }
 
 .manuscriptRecipe__head {
@@ -628,6 +782,108 @@ body {
 .manuscriptTreeWrap--tech {
   overflow: auto;
   padding-bottom: 10px;
+  scrollbar-color: rgba(215, 180, 106, 0.45) rgba(43, 28, 18, 0.06);
+}
+
+.manuscriptTreeWrap--tech::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.manuscriptTreeWrap--tech::-webkit-scrollbar-thumb {
+  background: rgba(215, 180, 106, 0.4);
+  border-radius: 8px;
+}
+
+@keyframes manuscriptBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes manuscriptSheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.94) rotateX(7deg);
+    filter: saturate(0.92) brightness(1.05);
+  }
+  70% {
+    filter: saturate(1.05) brightness(1);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
+    filter: saturate(1) brightness(1);
+  }
+}
+
+@keyframes manuscriptBlockIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes manuscriptSheenOnce {
+  from {
+    opacity: 0.38;
+    transform: scale(1.01);
+  }
+  45% {
+    opacity: 0.62;
+  }
+  to {
+    opacity: 0.48;
+    transform: scale(1);
+  }
+}
+
+.manuscriptSheet.manuscriptSheet--enter::before {
+  animation: manuscriptSheenOnce 1.35s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .manuscriptOverlay--open {
+    animation: manuscriptBackdropInReduced 0.22s ease forwards;
+  }
+
+  .manuscriptSheet--enter {
+    animation: manuscriptSheetInReduced 0.28s ease forwards;
+  }
+
+  .manuscriptOverlay--open .manuscriptZoomContent > * {
+    animation: none !important;
+  }
+
+  .manuscriptSheet.manuscriptSheet--enter::before {
+    animation: none;
+    opacity: 0.45;
+  }
+}
+
+@keyframes manuscriptBackdropInReduced {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes manuscriptSheetInReduced {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .techTreeWrap {
@@ -685,6 +941,17 @@ body {
 .techNode:hover {
   border-color: rgba(215,180,106,0.85);
   box-shadow: 0 14px 30px rgba(0,0,0,0.14);
+}
+
+.manuscriptOverlay .techNode {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.manuscriptOverlay .techNode:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 16px 36px rgba(43, 28, 18, 0.14),
+    0 0 0 1px rgba(215, 180, 106, 0.22);
 }
 
 .techNode__head {

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=2026-05-11-12" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-11-13" />
 </head>
 <body>
   <main class="wrap">
@@ -68,6 +68,19 @@
   </main>
 
   <div id="manuscriptOverlay" class="manuscriptOverlay" hidden>
+    <svg class="manuscriptFxDef" aria-hidden="true" focusable="false" width="0" height="0">
+      <defs>
+        <filter id="msTitleGlow" x="-8%" y="-25%" width="116%" height="160%" color-interpolation-filters="sRGB">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="blur" />
+          <feFlood flood-color="#d7b46a" flood-opacity="0.55" result="gold" />
+          <feComposite in="gold" in2="blur" operator="in" result="glow" />
+          <feMerge>
+            <feMergeNode in="glow" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+    </svg>
     <div
       class="manuscriptSheet"
       role="dialog"
@@ -98,6 +111,6 @@
     </div>
   </div>
 
-  <script src="main.js?v=2026-05-11-12"></script>
+  <script src="main.js?v=2026-05-11-13"></script>
 </body>
 </html>

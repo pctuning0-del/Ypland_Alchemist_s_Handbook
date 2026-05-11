@@ -57,6 +57,7 @@ async function init() {
   const btnMsZoomReset = document.getElementById("btnMsZoomReset");
   const manuscriptZoomLabel = document.getElementById("manuscriptZoomLabel");
   const btnManuscriptClose = document.getElementById("btnManuscriptClose");
+  const manuscriptSheet = manuscriptOverlay?.querySelector?.(".manuscriptSheet") ?? null;
 
   if (
     !listEl ||
@@ -407,6 +408,14 @@ async function init() {
     panel.classList.remove("viewPanel--anim");
     void panel.offsetWidth;
     panel.classList.add("viewPanel--anim");
+  }
+
+  function playEnterManuscript() {
+    manuscriptOverlay.classList.remove("manuscriptOverlay--open");
+    if (manuscriptSheet) manuscriptSheet.classList.remove("manuscriptSheet--enter");
+    void manuscriptOverlay.offsetWidth;
+    manuscriptOverlay.classList.add("manuscriptOverlay--open");
+    if (manuscriptSheet) manuscriptSheet.classList.add("manuscriptSheet--enter");
   }
 
   function parseIngredientsToItems(r) {
@@ -843,10 +852,12 @@ async function init() {
     }
 
     manuscriptOverlay.hidden = false;
-    playEnter(manuscriptOverlay);
+    requestAnimationFrame(() => playEnterManuscript());
   }
 
   function closeManuscript() {
+    manuscriptOverlay.classList.remove("manuscriptOverlay--open");
+    if (manuscriptSheet) manuscriptSheet.classList.remove("manuscriptSheet--enter");
     manuscriptOverlay.hidden = true;
     manuscriptZoomContent.replaceChildren();
     applyManuscriptZoom(1);
