@@ -726,19 +726,16 @@ async function init() {
       svg.setAttribute("height", String(h));
       while (svg.firstChild) svg.removeChild(svg.firstChild);
 
-      const lw = viewport.offsetWidth;
-      const cw = Math.max(1e-6, vpRect.width);
-      const lh = viewport.offsetHeight;
-      const ch = Math.max(1e-6, vpRect.height);
-      const layoutVsClient = Math.sqrt((lw / cw) * (lh / ch));
       const pageScale =
         window.visualViewport && window.visualViewport.scale > 0
-          ? window.visualViewport.scale
+          ? Math.min(1.35, window.visualViewport.scale)
           : 1;
-      const msZ = Math.max(0.45, Math.min(2.35, manuscriptZoom));
+      const msZ = Math.max(0.5, Math.min(2.35, manuscriptZoom));
+      // Без отношения offsetWidth/clientRect — при CSS zoom оно раздувает штрих до «серых плит».
+      // Лёгкая компенсация: чуть толще при сильном уменьшении манускрипта, жёсткий потолок ~3.2.
       const strokeW = Math.min(
-        10,
-        Math.max(2.35, (3.4 * pageScale * Math.max(1, layoutVsClient)) / msZ)
+        3.2,
+        Math.max(1.85, (2.35 * pageScale) / Math.pow(msZ, 0.42))
       );
 
       const nodeEls = viewport.querySelectorAll(".techNode[data-tree-uid]");
@@ -773,7 +770,6 @@ async function init() {
         path.setAttribute("d", elbowPath(a, b));
         path.setAttribute("class", "techTreeLine");
         path.setAttribute("stroke-width", String(snap(strokeW)));
-        path.setAttribute("shape-rendering", "crispEdges");
         svg.appendChild(path);
       }
     }
