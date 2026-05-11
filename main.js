@@ -1,4 +1,4 @@
-import { renderRecipeTechTree } from "./js/manuscriptTechTree.js";
+import { renderRecipeTechTree } from "./js/manuscriptTechTree.js?v=2026-05-11-15";
 
 function escapeHtml(text) {
   const div = document.createElement("div");

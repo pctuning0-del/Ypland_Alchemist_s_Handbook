@@ -1,13 +1,5 @@
 /**
- * Тех-дерево для манускрипта: колонки по глубине + связи на Canvas (чёткие линии при любом масштабе).
- * @param {object} rootRecipe
- * @param {object} ctx
- * @param {object[]} ctx.recipes
- * @param {() => number} ctx.getManuscriptZoom
- * @param {(r: object) => object[]} ctx.parseIngredientsToItems
- * @param {(all: object[], name: string, id: string) => object | null} ctx.findRecipeForIngredient
- * @param {(name: string, currentId: string) => HTMLElement | null} ctx.makeLogoSpanForIngredient
- * @param {(r: object) => void} ctx.showDetail
+ * Тех-дерево манускрипта: колонки по глубине + связи на Canvas (HiDPI, скругления, многослойный stroke).
  */
 export function renderRecipeTechTree(rootRecipe, ctx) {
   const {
@@ -157,15 +149,28 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
   viewport.appendChild(grid);
   wrap.appendChild(viewport);
 
+  /** До 3× для Retina / масштаба вкладки — без перегиба по памяти. */
   function pickDpr() {
-    return Math.min(2.5, Math.max(1, window.devicePixelRatio || 1));
+    const base = window.devicePixelRatio || 1;
+    const vv = window.visualViewport?.scale;
+    const scaleComp = vv && vv > 0 && vv < 1 ? 1 / vv : 1;
+    return Math.min(3, Math.max(1, base * Math.min(scaleComp, 1.15)));
   }
 
   function snapCss(v, dpr) {
     return Math.round(v * dpr) / dpr;
   }
 
-  function elbowPoints(a, b) {
+  /** Чёткие горизонтали/вертикали в CSS-пикселях после масштаба canvas. */
+  function snapLineCoord(cssVal, dpr, strokeCss, axis /* 'h' | 'v' */) {
+    const dev = cssVal * dpr;
+    const sw = strokeCss * dpr;
+    const aligned =
+      sw % 2 === 1 ? (Math.round(dev - 0.5) + 0.5) / dpr : Math.round(dev) / dpr;
+    return aligned;
+  }
+
+  function elbowGeometry(a, b) {
     const sx = a.x2;
     const sy = (a.y1 + a.y2) / 2;
     const tx = b.x1;
@@ -179,30 +184,125 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
     return { sx, sy, midX, ty, tx };
   }
 
+  /**
+   * Ортогональный путь H → V → H со скруглениями на локтях.
+   * Предполагается типичный порядок: sx < midX, якоря слева направо.
+   */
+  function traceRoundedElbow(g, sx, sy, midX, ty, tx, radiusCss) {
+    const down = ty >= sy;
+    const right = tx >= midX;
+    const dx1 = Math.abs(midX - sx);
+    const dy = Math.abs(ty - sy);
+    const dx2 = Math.abs(tx - midX);
+
+    g.beginPath();
+    g.moveTo(sx, sy);
+
+    if (dx1 < 2 || dy < 2 || dx2 < 2) {
+      g.lineTo(midX, sy);
+      g.lineTo(midX, ty);
+      g.lineTo(tx, ty);
+      return;
+    }
+
+    let r = Math.min(radiusCss, dx1 * 0.42, dy * 0.42, dx2 * 0.42);
+    r = Math.max(2.5, Math.min(r, dx1 * 0.48, dy * 0.48, dx2 * 0.48));
+
+    g.lineTo(midX - r, sy);
+    if (down) g.quadraticCurveTo(midX, sy, midX, sy + r);
+    else g.quadraticCurveTo(midX, sy, midX, sy - r);
+
+    if (down) g.lineTo(midX, ty - r);
+    else g.lineTo(midX, ty + r);
+
+    if (right) {
+      g.quadraticCurveTo(midX, ty, midX + r, ty);
+      g.lineTo(tx, ty);
+    } else {
+      g.quadraticCurveTo(midX, ty, midX - r, ty);
+      g.lineTo(tx, ty);
+    }
+  }
+
+  function strokeConnectorLayers(g, sx, sy, midX, ty, tx, coreW) {
+    const r = Math.min(10, Math.max(4, coreW * 2.2));
+
+    traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
+
+    g.lineJoin = "round";
+    g.lineCap = "round";
+
+    const glowW = coreW * 4.2;
+    g.lineWidth = glowW;
+    g.strokeStyle = "rgba(215, 180, 106, 0.14)";
+    g.globalAlpha = 1;
+    g.stroke();
+
+    traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
+    g.lineWidth = coreW * 2.1;
+    g.strokeStyle = "rgba(215, 180, 106, 0.28)";
+    g.stroke();
+
+    traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
+    const cx = (sx + tx) / 2;
+    const cy = (sy + ty) / 2;
+    const grad = g.createLinearGradient(sx, sy, tx, ty);
+    grad.addColorStop(0, "rgba(62, 42, 28, 0.92)");
+    grad.addColorStop(0.45, "rgba(43, 28, 18, 0.96)");
+    grad.addColorStop(1, "rgba(28, 18, 12, 0.98)");
+    g.lineWidth = coreW;
+    g.strokeStyle = grad;
+    g.stroke();
+
+    traceRoundedElbow(g, sx, sy, midX, ty, tx, r);
+    g.lineWidth = Math.max(0.85, coreW * 0.38);
+    g.strokeStyle = "rgba(255, 248, 235, 0.35)";
+    g.stroke();
+
+    const dotR = Math.max(2.4, coreW * 0.85);
+    g.fillStyle = "rgba(43, 28, 18, 0.95)";
+    g.beginPath();
+    g.arc(sx, sy, dotR, 0, Math.PI * 2);
+    g.fill();
+    g.beginPath();
+    g.arc(tx, ty, dotR * 0.92, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "rgba(255, 248, 235, 0.5)";
+    g.beginPath();
+    g.arc(sx - dotR * 0.25, sy - dotR * 0.25, dotR * 0.35, 0, Math.PI * 2);
+    g.fill();
+  }
+
   function redrawLines() {
     const dpr = pickDpr();
     const snap = (v) => snapCss(v, dpr);
     const vpRect = viewport.getBoundingClientRect();
     const cssW = Math.max(1, vpRect.width);
     const cssH = Math.max(1, vpRect.height);
-    const bw = Math.round(cssW * dpr);
-    const bh = Math.round(cssH * dpr);
+    const bw = Math.max(1, Math.round(cssW * dpr));
+    const bh = Math.max(1, Math.round(cssH * dpr));
     canvas.width = bw;
     canvas.height = bh;
     canvas.style.width = `${cssW}px`;
     canvas.style.height = `${cssH}px`;
 
-    const g = canvas.getContext("2d");
+    const g = canvas.getContext("2d", { alpha: true });
     if (!g) return;
+
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, cssW, cssH);
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = "high";
 
     const pageScale =
       window.visualViewport && window.visualViewport.scale > 0
         ? Math.min(1.35, window.visualViewport.scale)
         : 1;
     const msZ = Math.max(0.5, Math.min(2.35, getManuscriptZoom()));
-    const lineW = Math.min(3.4, Math.max(2, (2.5 * pageScale) / Math.pow(msZ, 0.38)));
+    const coreW = Math.min(
+      4.2,
+      Math.max(2.65, (3.15 * pageScale) / Math.pow(msZ, 0.35))
+    );
 
     const nodeEls = viewport.querySelectorAll(".techNode[data-tree-uid]");
     const pos = new Map();
@@ -218,37 +318,26 @@ export function renderRecipeTechTree(rootRecipe, ctx) {
       });
     });
 
-    g.lineJoin = "round";
-    g.lineCap = "round";
-
     for (const e of edges) {
       const a = pos.get(e.fromUid);
       const b = pos.get(e.toUid);
       if (!a || !b) continue;
-      const { sx, sy, midX, ty, tx } = elbowPoints(a, b);
+      let { sx, sy, midX, ty, tx } = elbowGeometry(a, b);
 
-      g.beginPath();
-      g.moveTo(sx, sy);
-      g.lineTo(midX, sy);
-      g.lineTo(midX, ty);
-      g.lineTo(tx, ty);
+      sx = snapLineCoord(sx, dpr, coreW, "v");
+      sy = snapLineCoord(sy, dpr, coreW, "h");
+      midX = snapLineCoord(midX, dpr, coreW, "v");
+      ty = snapLineCoord(ty, dpr, coreW, "h");
+      tx = snapLineCoord(tx, dpr, coreW, "v");
 
-      g.lineWidth = lineW + 2.2;
-      g.strokeStyle = "rgba(215, 180, 106, 0.22)";
-      g.stroke();
-
-      g.beginPath();
-      g.moveTo(sx, sy);
-      g.lineTo(midX, sy);
-      g.lineTo(midX, ty);
-      g.lineTo(tx, ty);
-      g.lineWidth = lineW;
-      g.strokeStyle = "rgba(43, 28, 18, 0.82)";
-      g.stroke();
+      strokeConnectorLayers(g, sx, sy, midX, ty, tx, coreW);
     }
   }
 
-  requestAnimationFrame(() => redrawLines());
+  requestAnimationFrame(() => {
+    redrawLines();
+    requestAnimationFrame(() => redrawLines());
+  });
   const ro = new ResizeObserver(() => redrawLines());
   ro.observe(viewport);
   const scrollHost = wrap.closest(".manuscriptTreeWrap--tech") || wrap;
