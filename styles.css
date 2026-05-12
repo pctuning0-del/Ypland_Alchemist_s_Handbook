@@ -42,10 +42,32 @@ body {
   padding: 10px 12px 16px;
 }
 
+.book__titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 14px;
+}
+
 .book__title {
   font-weight: 800;
   letter-spacing: 0.3px;
   font-size: 22px;
+}
+
+.book__pitchLink {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(215, 180, 106, 0.45);
+  white-space: nowrap;
+}
+
+.book__pitchLink:hover {
+  color: #fff;
+  border-bottom-color: rgba(215, 180, 106, 0.85);
 }
 
 .book__subtitle {

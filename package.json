@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node index.js",
-    "import:yupland": "node tools/build_recipes_from_yupland.mjs tools/yupland_import_manifest.json"
+    "import:yupland": "node tools/build_recipes_from_yupland.mjs tools/yupland_import_manifest.json",
+    "export:presentation-pdf": "node tools/export_presentation_pdf.mjs"
   },
   "dependencies": {
     "@xyflow/react": "^12.10.2",
